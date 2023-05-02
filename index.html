@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Farm Fresh</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header>
+      <h1>My Farm Fresh Website</h1>
+      <nav>
+        <ul>
+          <li><a href="#">Home</a></li>
+          <li><a href="#">Shop</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main>
+      <section class="product-list">
+        <h2>Featured Products</h2>
+        <ul>
+          <li>
+            <img src="product-1.png" alt="Tomatoes">
+            <h3>Tomatoes</h3>
+            <p>KES 100</p>
+            <button class="add-to-cart" data-name="Tomatoes" data-price="100">Add to Cart</button>
+          </li>
+          <li>
+            <img src="product-2.png" alt="Spinach">
+            <h3>Spinach</h3>
+            <p>KES 30</p>
+            <button class="add-to-cart" data-name="Spinach" data-price="30">Add to Cart</button>
+          </li>
+          <li>
+            <img src="product-3.png" alt="Zucchini">
+            <h3>Zucchini</h3>
+            <p>KES 110</p>
+            <button class="add-to-cart" data-name="Zucchini" data-price="110">Add to Cart</button>
+          </li>
+        </ul>
+      </section>
+      <section class="cart">
+        <h2>Cart</h2>
+        <ul></ul>
+        <p>Total: KES<span class="total">0.00</span></p>
+        <button class="checkout">Checkout</button>
+      </section>
+    </main>
+    <footer>
+      <p>&copy; 2023 My Farm Fresh Website</p>
+    </footer>
+    <script src="script.js"></script>
+  </body>
+</html>
