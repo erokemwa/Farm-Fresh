@@ -13,7 +13,11 @@ Installation
 To run this web application on your local machine, you will need to clone this repository and open the index.html file in your web browser. Here are the steps to do so:
 
 Open your terminal and navigate to the directory where you want to clone the repository.
-Run the command ```git clone https://github.com/erokemwa/Farm-Fresh.git```
+
+Run the command 
+
+```git clone https://github.com/erokemwa/Farm-Fresh.git```
+
 Navigate to the farm-fresh-e-commerce directory.
 Open the index.html file in your web browser.
 Usage
