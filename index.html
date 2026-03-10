@@ -9,49 +9,178 @@
   </head>
   <body>
     <header>
-      <h1>My Farm Fresh Website</h1>
+      <h1>Farm Fresh</h1>
       <nav aria-label="Main navigation">
         <ul>
           <li><a href="#">Home</a></li>
           <li><a href="#products">Shop</a></li>
-          <li><a href="#">About</a></li>
+          <li><a href="#farmers">Farmers</a></li>
+          <li><a href="#reviews">Reviews</a></li>
           <li><a href="#">Contact</a></li>
+          <li><a href="#cart">🛒 Cart <span id="cart-count">0</span></a></li>
         </ul>
       </nav>
     </header>
+
+    <section class="hero">
+      <div class="hero-content">
+        <h2>Fresh from the farm, straight to your door</h2>
+        <p>Support local farmers and enjoy the freshest produce delivered to you.</p>
+        <a href="#products" class="btn-cta">Shop Now</a>
+      </div>
+    </section>
+
+    <section id="farmers" class="farmers-section">
+      <h2>Meet Our Farmers</h2>
+      <div class="farmers-grid">
+        <div class="farmer-card">
+          <h3>John Kamau</h3>
+          <p class="farmer-location">📍 Nakuru, Kenya</p>
+          <p class="farmer-bio">John has been farming organically for over 15 years, specialising in tomatoes and leafy greens grown without pesticides.</p>
+          <a href="#products" class="farmer-link">View Products</a>
+        </div>
+        <div class="farmer-card">
+          <h3>Amina Wanjiru</h3>
+          <p class="farmer-location">📍 Kiambu, Kenya</p>
+          <p class="farmer-bio">Amina runs a family farm famous for its award-winning spinach and zucchini, using traditional irrigation methods.</p>
+          <a href="#products" class="farmer-link">View Products</a>
+        </div>
+      </div>
+    </section>
+
     <main>
-      <section id="products" class="product-list">
-        <h2>Featured Products</h2>
-        <ul>
-          <li>
-            <img src="product-1.png" alt="Tomatoes">
-            <h3>Tomatoes</h3>
-            <p>KES 100</p>
-            <button type="button" class="add-to-cart" data-name="Tomatoes" data-price="100">Add to Cart</button>
-          </li>
-          <li>
-            <img src="product-2.png" alt="Spinach">
-            <h3>Spinach</h3>
-            <p>KES 30</p>
-            <button type="button" class="add-to-cart" data-name="Spinach" data-price="30">Add to Cart</button>
-          </li>
-          <li>
-            <img src="product-3.png" alt="Zucchini">
-            <h3>Zucchini</h3>
-            <p>KES 110</p>
-            <button type="button" class="add-to-cart" data-name="Zucchini" data-price="110">Add to Cart</button>
-          </li>
-        </ul>
-      </section>
-      <section class="cart">
+      <div class="products-wrapper">
+        <div class="search-bar-wrapper">
+          <input type="search" id="product-search" placeholder="Search products, farmers, or locations…" aria-label="Search products">
+        </div>
+
+        <section id="products" class="product-list">
+          <h2>Featured Products</h2>
+          <ul>
+            <li data-name="Tomatoes" data-farmer="John's Farm" data-availability="available">
+              <img src="product-1.png" alt="Tomatoes">
+              <h3>Tomatoes</h3>
+              <small>By John's Farm</small>
+              <p>KES 100</p>
+              <div class="rating" aria-label="4 out of 5 stars">★★★★☆</div>
+              <span class="badge available">In Stock</span>
+              <div class="qty-wrapper">
+                <label for="qty-tomatoes">Qty:</label>
+                <input type="number" id="qty-tomatoes" class="qty-input" min="1" value="1" aria-label="Quantity for Tomatoes">
+              </div>
+              <button type="button" class="add-to-cart" data-name="Tomatoes" data-price="100" data-farmer="John's Farm" data-availability="available">Add to Cart</button>
+            </li>
+            <li data-name="Spinach" data-farmer="Amina's Farm" data-availability="available">
+              <img src="product-2.png" alt="Spinach">
+              <h3>Spinach</h3>
+              <small>By Amina's Farm</small>
+              <p>KES 30</p>
+              <div class="rating" aria-label="5 out of 5 stars">★★★★★</div>
+              <span class="badge available">In Stock</span>
+              <div class="qty-wrapper">
+                <label for="qty-spinach">Qty:</label>
+                <input type="number" id="qty-spinach" class="qty-input" min="1" value="1" aria-label="Quantity for Spinach">
+              </div>
+              <button type="button" class="add-to-cart" data-name="Spinach" data-price="30" data-farmer="Amina's Farm" data-availability="available">Add to Cart</button>
+            </li>
+            <li data-name="Zucchini" data-farmer="Amina's Farm" data-availability="available">
+              <img src="product-3.png" alt="Zucchini">
+              <h3>Zucchini</h3>
+              <small>By Amina's Farm</small>
+              <p>KES 110</p>
+              <div class="rating" aria-label="4 out of 5 stars">★★★★☆</div>
+              <span class="badge available">In Stock</span>
+              <div class="qty-wrapper">
+                <label for="qty-zucchini">Qty:</label>
+                <input type="number" id="qty-zucchini" class="qty-input" min="1" value="1" aria-label="Quantity for Zucchini">
+              </div>
+              <button type="button" class="add-to-cart" data-name="Zucchini" data-price="110" data-farmer="Amina's Farm" data-availability="available">Add to Cart</button>
+            </li>
+          </ul>
+        </section>
+
+        <section id="reviews" class="reviews-section">
+          <h2>Reviews</h2>
+          <div class="reviews-list">
+            <div class="review-card">
+              <strong>Grace Njeri</strong>
+              <div class="rating" aria-label="5 out of 5 stars">★★★★★</div>
+              <p>"The tomatoes were incredibly fresh and arrived quickly. Will definitely order again!"</p>
+            </div>
+          </div>
+          <h3>Leave a Review</h3>
+          <form id="review-form" novalidate>
+            <div class="form-group">
+              <label for="review-name">Your Name</label>
+              <input type="text" id="review-name" placeholder="Your name" required>
+            </div>
+            <div class="form-group">
+              <fieldset>
+                <legend>Rating</legend>
+                <div class="star-radio-group">
+                  <label><input type="radio" name="rating" value="1" required> ★ 1</label>
+                  <label><input type="radio" name="rating" value="2"> ★★ 2</label>
+                  <label><input type="radio" name="rating" value="3"> ★★★ 3</label>
+                  <label><input type="radio" name="rating" value="4"> ★★★★ 4</label>
+                  <label><input type="radio" name="rating" value="5"> ★★★★★ 5</label>
+                </div>
+              </fieldset>
+            </div>
+            <div class="form-group">
+              <label for="review-comment">Comment</label>
+              <textarea id="review-comment" rows="4" placeholder="Share your experience…" required></textarea>
+            </div>
+            <button type="submit" class="btn-submit">Submit Review</button>
+          </form>
+        </section>
+      </div>
+
+      <section id="cart" class="cart">
         <h2>Cart</h2>
-        <ul aria-label="Cart items"><li class="empty-cart-msg">Your cart is empty.</li></ul>
-        <p>Total: KES <span class="total">0.00</span></p>
+        <ul aria-label="Cart items">
+          <li class="empty-cart-msg">Your cart is empty.</li>
+        </ul>
+        <p class="cart-total-line">Total: KES <span class="total">0.00</span></p>
+        <div id="order-confirmation" class="order-confirmation" hidden>
+          ✅ Order placed! Thank you for shopping with Farm Fresh.
+        </div>
         <button type="button" class="checkout">Checkout</button>
+
+        <div id="checkout-form-wrapper" class="checkout-form-wrapper" hidden>
+          <h3>Payment Details</h3>
+          <form id="checkout-form" novalidate>
+            <div class="form-group">
+              <label for="checkout-name">Full Name</label>
+              <input type="text" id="checkout-name" placeholder="Full name" required>
+            </div>
+            <div class="form-group">
+              <label for="checkout-phone">Phone / Card Number</label>
+              <input type="text" id="checkout-phone" placeholder="e.g. 0712 345 678 or card number" required>
+            </div>
+            <button type="submit" class="btn-submit">Confirm Order</button>
+          </form>
+        </div>
+
+        <div class="payment-methods">
+          <p>We accept:</p>
+          <span class="payment-icon">M-Pesa</span>
+          <span class="payment-icon">Visa</span>
+          <span class="payment-icon">Mastercard</span>
+        </div>
       </section>
     </main>
+
     <footer>
-      <p>&copy; 2026 My Farm Fresh Website</p>
+      <p>&copy; 2026 Farm Fresh. All rights reserved.</p>
+      <nav aria-label="Footer navigation">
+        <ul>
+          <li><a href="#">Home</a></li>
+          <li><a href="#products">Shop</a></li>
+          <li><a href="#farmers">Farmers</a></li>
+          <li><a href="#reviews">Reviews</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </nav>
     </footer>
     <script src="script.js"></script>
   </body>
