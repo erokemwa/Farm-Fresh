@@ -54,6 +54,8 @@ function updateCartDisplay() {
     if (cartCountBadge) cartCountBadge.textContent = '0';
     const cartHeaderCount = document.getElementById('cart-header-count');
     if (cartHeaderCount) cartHeaderCount.textContent = '0';
+    const fabCount = document.getElementById('fab-cart-count');
+    if (fabCount) fabCount.textContent = '0';
     return;
   }
 
@@ -88,6 +90,8 @@ function updateCartDisplay() {
   }
   const cartHeaderCount = document.getElementById('cart-header-count');
   if (cartHeaderCount) cartHeaderCount.textContent = totalQty;
+  const fabCount = document.getElementById('fab-cart-count');
+  if (fabCount) fabCount.textContent = totalQty;
 
   checkoutButton.style.display = cartItems.length === 0 ? 'none' : 'block';
 }
@@ -96,6 +100,12 @@ function updateCartDisplay() {
 checkoutButton.addEventListener('click', () => {
   if (checkoutFormWrapper) {
     checkoutFormWrapper.hidden = false;
+  }
+  const summaryEl = document.getElementById('order-summary-preview');
+  if (summaryEl) {
+    summaryEl.innerHTML = cartItems.map(i =>
+      `<div class="summary-row"><span>${escapeHtml(i.name)} ×${i.quantity}</span><span>${formatKES(i.price * i.quantity)}</span></div>`
+    ).join('') + `<div class="summary-total"><strong>Total: ${formatKES(cartItems.reduce((a, i) => a + i.price * i.quantity, 0))}</strong></div>`;
   }
 });
 
@@ -162,6 +172,12 @@ if (reviewForm) {
 
     if (!reviewerName || !rating || !comment) return;
 
+    const submitBtn = document.getElementById('btn-submit-review');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting…';
+    }
+
     const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
     const ariaLabel = `${rating} out of 5 stars`;
 
@@ -179,6 +195,11 @@ if (reviewForm) {
     }
 
     reviewForm.reset();
+
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Review';
+    }
   });
 }
 

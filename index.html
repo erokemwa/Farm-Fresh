@@ -16,7 +16,7 @@
           <h1 class="logo">Farm Fresh</h1>
         </a>
         <div class="header-search">
-          <input type="search" id="product-search" placeholder="Search products, farmers, or locations…" aria-label="Search products">
+          <input type="search" id="product-search" placeholder="Search products, farmers, or locations…" aria-label="Search products" enterkeyhint="search">
           <button type="button" class="search-btn" aria-label="Search">🔍</button>
         </div>
         <a href="#cart" class="cart-icon-link" aria-label="View cart">
@@ -43,8 +43,155 @@
         <h2>Fresh from the farm, straight to your door</h2>
         <p>Support local farmers and enjoy the freshest organic produce delivered to you.</p>
         <a href="#products" class="btn-cta">Shop Now</a>
+        <a href="#farmers" class="btn-cta-secondary">Meet Our Farmers</a>
       </div>
     </section>
+
+    <main>
+      <div class="products-wrapper">
+        <div class="category-filters" role="group" aria-label="Filter by category">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="vegetables">Vegetables</button>
+          <button class="filter-btn" data-filter="greens">Greens</button>
+          <button class="filter-btn" data-filter="fruits">Fruits</button>
+        </div>
+
+        <section id="products" class="product-list">
+          <h2>Featured Products</h2>
+          <ul>
+            <li data-name="Tomatoes" data-farmer="John's Farm" data-availability="available" data-category="vegetables">
+              <img src="product-1.png" alt="Tomatoes" loading="lazy">
+              <h3>Tomatoes</h3>
+              <small>By John's Farm</small>
+              <del class="price-was">KES 120</del>
+              <p>KES 100</p>
+              <small class="product-unit">per kg</small>
+              <div class="rating" aria-label="4 out of 5 stars">★★★★☆</div>
+              <span class="review-count">(12 reviews)</span>
+              <span class="badge available">In Stock</span>
+              <div class="qty-wrapper">
+                <button type="button" class="qty-minus" aria-label="Decrease quantity for Tomatoes">−</button>
+                <input type="number" id="qty-tomatoes" class="qty-input" min="1" value="1" aria-label="Quantity for Tomatoes">
+                <button type="button" class="qty-plus" aria-label="Increase quantity for Tomatoes">+</button>
+              </div>
+              <button type="button" class="add-to-cart" data-name="Tomatoes" data-price="100" data-farmer="John's Farm" data-availability="available">🛒 Add to Cart</button>
+            </li>
+            <li data-name="Spinach" data-farmer="Amina's Farm" data-availability="available" data-category="greens">
+              <img src="product-2.png" alt="Spinach" loading="lazy">
+              <h3>Spinach</h3>
+              <small>By Amina's Farm</small>
+              <p>KES 30</p>
+              <small class="product-unit">per bunch</small>
+              <div class="rating" aria-label="5 out of 5 stars">★★★★★</div>
+              <span class="review-count">(12 reviews)</span>
+              <span class="badge available">In Stock</span>
+              <div class="qty-wrapper">
+                <button type="button" class="qty-minus" aria-label="Decrease quantity for Spinach">−</button>
+                <input type="number" id="qty-spinach" class="qty-input" min="1" value="1" aria-label="Quantity for Spinach">
+                <button type="button" class="qty-plus" aria-label="Increase quantity for Spinach">+</button>
+              </div>
+              <button type="button" class="add-to-cart" data-name="Spinach" data-price="30" data-farmer="Amina's Farm" data-availability="available">🛒 Add to Cart</button>
+            </li>
+            <li data-name="Zucchini" data-farmer="Amina's Farm" data-availability="available" data-category="vegetables">
+              <img src="product-3.png" alt="Zucchini" loading="lazy">
+              <h3>Zucchini</h3>
+              <small>By Amina's Farm</small>
+              <del class="price-was">KES 140</del>
+              <p>KES 110</p>
+              <small class="product-unit">per kg</small>
+              <div class="rating" aria-label="4 out of 5 stars">★★★★☆</div>
+              <span class="review-count">(12 reviews)</span>
+              <span class="badge available">In Stock</span>
+              <div class="qty-wrapper">
+                <button type="button" class="qty-minus" aria-label="Decrease quantity for Zucchini">−</button>
+                <input type="number" id="qty-zucchini" class="qty-input" min="1" value="1" aria-label="Quantity for Zucchini">
+                <button type="button" class="qty-plus" aria-label="Increase quantity for Zucchini">+</button>
+              </div>
+              <button type="button" class="add-to-cart" data-name="Zucchini" data-price="110" data-farmer="Amina's Farm" data-availability="available">🛒 Add to Cart</button>
+            </li>
+          </ul>
+        </section>
+
+        <section id="reviews" class="reviews-section">
+          <h2>Reviews</h2>
+          <div class="reviews-list">
+            <div class="review-card">
+              <strong>Grace Njeri</strong>
+              <div class="rating" aria-label="5 out of 5 stars">★★★★★</div>
+              <p>"The tomatoes were incredibly fresh and arrived quickly. Will definitely order again!"</p>
+            </div>
+          </div>
+          <h3>Leave a Review</h3>
+          <form id="review-form" novalidate>
+            <div class="form-group">
+              <label for="review-name">Your Name</label>
+              <input type="text" id="review-name" placeholder="Your name" required autocomplete="name">
+            </div>
+            <div class="form-group">
+              <fieldset>
+                <legend>Rating</legend>
+                <div class="star-radio-group">
+                  <label><input type="radio" name="rating" value="1" required> ★ 1</label>
+                  <label><input type="radio" name="rating" value="2"> ★★ 2</label>
+                  <label><input type="radio" name="rating" value="3"> ★★★ 3</label>
+                  <label><input type="radio" name="rating" value="4"> ★★★★ 4</label>
+                  <label><input type="radio" name="rating" value="5"> ★★★★★ 5</label>
+                </div>
+              </fieldset>
+            </div>
+            <div class="form-group">
+              <label for="review-comment">Comment</label>
+              <textarea id="review-comment" rows="4" placeholder="Share your experience…" required></textarea>
+            </div>
+            <button type="submit" class="btn-submit" id="btn-submit-review">Submit Review</button>
+          </form>
+        </section>
+      </div>
+
+      <section id="cart" class="cart">
+        <div class="cart-header">
+          <span>🛒 Cart</span>
+          <span class="cart-header-count">(<span id="cart-header-count">0</span> items)</span>
+        </div>
+        <ul aria-label="Cart items">
+          <li class="empty-cart-msg">Your cart is empty.</li>
+        </ul>
+        <p class="cart-total-line">Total: KES <span class="total">0.00</span></p>
+        <div id="order-confirmation" class="order-confirmation" hidden>
+          ✅ Order placed! Thank you for shopping with Farm Fresh.<br>
+          <small>We'll call you to confirm. Expected delivery: within 24 hours.</small>
+        </div>
+        <p class="secure-checkout-label">🔒 Secure Checkout</p>
+        <button type="button" class="checkout">Checkout</button>
+
+        <div id="checkout-form-wrapper" class="checkout-form-wrapper" hidden>
+          <h3>Payment Details</h3>
+          <form id="checkout-form" novalidate>
+            <div class="form-group">
+              <label for="checkout-name">Full Name</label>
+              <input type="text" id="checkout-name" placeholder="Full name" required autocomplete="name">
+            </div>
+            <div class="form-group">
+              <label for="checkout-phone">Phone Number</label>
+              <input type="tel" id="checkout-phone" autocomplete="tel" placeholder="e.g. 0712 345 678" required>
+            </div>
+            <div class="form-group">
+              <label for="checkout-address">Delivery Address</label>
+              <input type="text" id="checkout-address" autocomplete="street-address" placeholder="e.g. 14 Moi Avenue, Nairobi" required>
+            </div>
+            <div class="order-summary-preview" id="order-summary-preview"></div>
+            <button type="submit" class="btn-submit">Confirm Order</button>
+          </form>
+        </div>
+
+        <div class="payment-methods">
+          <p>We accept:</p>
+          <span class="payment-icon">M-Pesa</span>
+          <span class="payment-icon">Visa</span>
+          <span class="payment-icon">Mastercard</span>
+        </div>
+      </section>
+    </main>
 
     <section id="farmers" class="farmers-section">
       <h2>Meet Our Farmers</h2>
@@ -63,137 +210,6 @@
         </div>
       </div>
     </section>
-
-    <main>
-      <div class="products-wrapper">
-        <div class="category-filters" role="group" aria-label="Filter by category">
-          <button class="filter-btn active" data-filter="all">All</button>
-          <button class="filter-btn" data-filter="vegetables">Vegetables</button>
-          <button class="filter-btn" data-filter="greens">Greens</button>
-          <button class="filter-btn" data-filter="fruits">Fruits</button>
-        </div>
-
-        <section id="products" class="product-list">
-          <h2>Featured Products</h2>
-          <ul>
-            <li data-name="Tomatoes" data-farmer="John's Farm" data-availability="available" data-category="vegetables">
-              <img src="product-1.png" alt="Tomatoes">
-              <h3>Tomatoes</h3>
-              <small>By John's Farm</small>
-              <p>KES 100</p>
-              <div class="rating" aria-label="4 out of 5 stars">★★★★☆</div>
-              <span class="badge available">In Stock</span>
-              <div class="qty-wrapper">
-                <button type="button" class="qty-minus" aria-label="Decrease quantity for Tomatoes">−</button>
-                <input type="number" id="qty-tomatoes" class="qty-input" min="1" value="1" aria-label="Quantity for Tomatoes">
-                <button type="button" class="qty-plus" aria-label="Increase quantity for Tomatoes">+</button>
-              </div>
-              <button type="button" class="add-to-cart" data-name="Tomatoes" data-price="100" data-farmer="John's Farm" data-availability="available">Add to Cart</button>
-            </li>
-            <li data-name="Spinach" data-farmer="Amina's Farm" data-availability="available" data-category="greens">
-              <img src="product-2.png" alt="Spinach">
-              <h3>Spinach</h3>
-              <small>By Amina's Farm</small>
-              <p>KES 30</p>
-              <div class="rating" aria-label="5 out of 5 stars">★★★★★</div>
-              <span class="badge available">In Stock</span>
-              <div class="qty-wrapper">
-                <button type="button" class="qty-minus" aria-label="Decrease quantity for Spinach">−</button>
-                <input type="number" id="qty-spinach" class="qty-input" min="1" value="1" aria-label="Quantity for Spinach">
-                <button type="button" class="qty-plus" aria-label="Increase quantity for Spinach">+</button>
-              </div>
-              <button type="button" class="add-to-cart" data-name="Spinach" data-price="30" data-farmer="Amina's Farm" data-availability="available">Add to Cart</button>
-            </li>
-            <li data-name="Zucchini" data-farmer="Amina's Farm" data-availability="available" data-category="vegetables">
-              <img src="product-3.png" alt="Zucchini">
-              <h3>Zucchini</h3>
-              <small>By Amina's Farm</small>
-              <p>KES 110</p>
-              <div class="rating" aria-label="4 out of 5 stars">★★★★☆</div>
-              <span class="badge available">In Stock</span>
-              <div class="qty-wrapper">
-                <button type="button" class="qty-minus" aria-label="Decrease quantity for Zucchini">−</button>
-                <input type="number" id="qty-zucchini" class="qty-input" min="1" value="1" aria-label="Quantity for Zucchini">
-                <button type="button" class="qty-plus" aria-label="Increase quantity for Zucchini">+</button>
-              </div>
-              <button type="button" class="add-to-cart" data-name="Zucchini" data-price="110" data-farmer="Amina's Farm" data-availability="available">Add to Cart</button>
-            </li>
-          </ul>
-        </section>
-
-        <section id="reviews" class="reviews-section">
-          <h2>Reviews</h2>
-          <div class="reviews-list">
-            <div class="review-card">
-              <strong>Grace Njeri</strong>
-              <div class="rating" aria-label="5 out of 5 stars">★★★★★</div>
-              <p>"The tomatoes were incredibly fresh and arrived quickly. Will definitely order again!"</p>
-            </div>
-          </div>
-          <h3>Leave a Review</h3>
-          <form id="review-form" novalidate>
-            <div class="form-group">
-              <label for="review-name">Your Name</label>
-              <input type="text" id="review-name" placeholder="Your name" required>
-            </div>
-            <div class="form-group">
-              <fieldset>
-                <legend>Rating</legend>
-                <div class="star-radio-group">
-                  <label><input type="radio" name="rating" value="1" required> ★ 1</label>
-                  <label><input type="radio" name="rating" value="2"> ★★ 2</label>
-                  <label><input type="radio" name="rating" value="3"> ★★★ 3</label>
-                  <label><input type="radio" name="rating" value="4"> ★★★★ 4</label>
-                  <label><input type="radio" name="rating" value="5"> ★★★★★ 5</label>
-                </div>
-              </fieldset>
-            </div>
-            <div class="form-group">
-              <label for="review-comment">Comment</label>
-              <textarea id="review-comment" rows="4" placeholder="Share your experience…" required></textarea>
-            </div>
-            <button type="submit" class="btn-submit">Submit Review</button>
-          </form>
-        </section>
-      </div>
-
-      <section id="cart" class="cart">
-        <div class="cart-header">
-          <span>🛒 Cart</span>
-          <span class="cart-header-count">(<span id="cart-header-count">0</span> items)</span>
-        </div>
-        <ul aria-label="Cart items">
-          <li class="empty-cart-msg">Your cart is empty.</li>
-        </ul>
-        <p class="cart-total-line">Total: KES <span class="total">0.00</span></p>
-        <div id="order-confirmation" class="order-confirmation" hidden>
-          ✅ Order placed! Thank you for shopping with Farm Fresh.
-        </div>
-        <button type="button" class="checkout">Checkout</button>
-
-        <div id="checkout-form-wrapper" class="checkout-form-wrapper" hidden>
-          <h3>Payment Details</h3>
-          <form id="checkout-form" novalidate>
-            <div class="form-group">
-              <label for="checkout-name">Full Name</label>
-              <input type="text" id="checkout-name" placeholder="Full name" required>
-            </div>
-            <div class="form-group">
-              <label for="checkout-phone">Phone / Card Number</label>
-              <input type="text" id="checkout-phone" placeholder="e.g. 0712 345 678 or card number" required>
-            </div>
-            <button type="submit" class="btn-submit">Confirm Order</button>
-          </form>
-        </div>
-
-        <div class="payment-methods">
-          <p>We accept:</p>
-          <span class="payment-icon">M-Pesa</span>
-          <span class="payment-icon">Visa</span>
-          <span class="payment-icon">Mastercard</span>
-        </div>
-      </section>
-    </main>
 
     <footer>
       <div class="footer-main">
@@ -224,6 +240,9 @@
         <p>&copy; 2026 Farm Fresh. All rights reserved.</p>
       </div>
     </footer>
+    <a href="#cart" class="fab-cart" aria-label="View cart">
+      🛒 <span class="fab-cart-count" id="fab-cart-count">0</span>
+    </a>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="script.js"></script>
   </body>
