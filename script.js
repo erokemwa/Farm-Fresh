@@ -10,6 +10,9 @@ const checkoutButton = cart.querySelector('.checkout');
 // Initialize an empty cart array to hold the added products
 let cartItems = [];
 
+// Hide the checkout button on page load since the cart starts empty
+checkoutButton.style.display = 'none';
+
 // Add event listeners to all "add to cart" buttons
 addToCartButtons.forEach(button => {
   button.addEventListener('click', () => {
@@ -25,15 +28,25 @@ addToCartButtons.forEach(button => {
   });
 });
 
-// Update the cart display with the current cart items and total price
 function updateCartDisplay() {
   // Clear the cart list
   cartList.innerHTML = '';
 
+  if (cartItems.length === 0) {
+    // Show the empty cart message
+    const emptyMsg = document.createElement('li');
+    emptyMsg.className = 'empty-cart-msg';
+    emptyMsg.textContent = 'Your cart is empty.';
+    cartList.appendChild(emptyMsg);
+    checkoutButton.style.display = 'none';
+    cartTotal.textContent = '0.00';
+    return;
+  }
+
   // Add each cart item to the cart list
   cartItems.forEach(item => {
     const listItem = document.createElement('li');
-    listItem.textContent = `${item.name} - KES${item.price}`;
+    listItem.textContent = `${item.name} - KES ${item.price}`;
     cartList.appendChild(listItem);
   });
 
@@ -43,12 +56,8 @@ function updateCartDisplay() {
   // Update the total price display
   cartTotal.textContent = total.toFixed(2);
 
-  // Show or hide the checkout button based on whether the cart is empty
-  if (cartItems.length === 0) {
-    checkoutButton.style.display = 'none';
-  } else {
-    checkoutButton.style.display = 'block';
-  }
+  // Show the checkout button
+  checkoutButton.style.display = 'block';
 }
 
 // Add event listener to the checkout button
