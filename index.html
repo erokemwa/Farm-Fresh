@@ -8,24 +8,40 @@
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
+    <div class="announcement-bar">🚚 Free delivery on orders over KES 500 &nbsp;|&nbsp; 🌿 100% Organic</div>
+
     <header>
-      <h1>Farm Fresh</h1>
-      <nav aria-label="Main navigation">
-        <ul>
-          <li><a href="#">Home</a></li>
-          <li><a href="#products">Shop</a></li>
-          <li><a href="#farmers">Farmers</a></li>
-          <li><a href="#reviews">Reviews</a></li>
-          <li><a href="#">Contact</a></li>
-          <li><a href="#cart">🛒 Cart <span id="cart-count">0</span></a></li>
-        </ul>
-      </nav>
+      <div class="header-top">
+        <a href="#" class="logo-link" aria-label="Farm Fresh Home">
+          <h1 class="logo">Farm Fresh</h1>
+        </a>
+        <div class="header-search">
+          <input type="search" id="product-search" placeholder="Search products, farmers, or locations…" aria-label="Search products">
+          <button type="button" class="search-btn" aria-label="Search">🔍</button>
+        </div>
+        <a href="#cart" class="cart-icon-link" aria-label="View cart">
+          🛒 <span class="cart-badge" id="cart-count">0</span>
+        </a>
+      </div>
+      <div class="header-bottom">
+        <button class="hamburger" aria-label="Toggle navigation">☰</button>
+        <nav aria-label="Main navigation">
+          <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#products">Shop</a></li>
+            <li><a href="#farmers">Farmers</a></li>
+            <li><a href="#reviews">Reviews</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
     </header>
 
     <section class="hero">
       <div class="hero-content">
+        <span class="hero-badge">✅ Trusted by 1,000+ families</span>
         <h2>Fresh from the farm, straight to your door</h2>
-        <p>Support local farmers and enjoy the freshest produce delivered to you.</p>
+        <p>Support local farmers and enjoy the freshest organic produce delivered to you.</p>
         <a href="#products" class="btn-cta">Shop Now</a>
       </div>
     </section>
@@ -50,14 +66,17 @@
 
     <main>
       <div class="products-wrapper">
-        <div class="search-bar-wrapper">
-          <input type="search" id="product-search" placeholder="Search products, farmers, or locations…" aria-label="Search products">
+        <div class="category-filters" role="group" aria-label="Filter by category">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="vegetables">Vegetables</button>
+          <button class="filter-btn" data-filter="greens">Greens</button>
+          <button class="filter-btn" data-filter="fruits">Fruits</button>
         </div>
 
         <section id="products" class="product-list">
           <h2>Featured Products</h2>
           <ul>
-            <li data-name="Tomatoes" data-farmer="John's Farm" data-availability="available">
+            <li data-name="Tomatoes" data-farmer="John's Farm" data-availability="available" data-category="vegetables">
               <img src="product-1.png" alt="Tomatoes">
               <h3>Tomatoes</h3>
               <small>By John's Farm</small>
@@ -65,12 +84,13 @@
               <div class="rating" aria-label="4 out of 5 stars">★★★★☆</div>
               <span class="badge available">In Stock</span>
               <div class="qty-wrapper">
-                <label for="qty-tomatoes">Qty:</label>
+                <button type="button" class="qty-minus" aria-label="Decrease quantity for Tomatoes">−</button>
                 <input type="number" id="qty-tomatoes" class="qty-input" min="1" value="1" aria-label="Quantity for Tomatoes">
+                <button type="button" class="qty-plus" aria-label="Increase quantity for Tomatoes">+</button>
               </div>
               <button type="button" class="add-to-cart" data-name="Tomatoes" data-price="100" data-farmer="John's Farm" data-availability="available">Add to Cart</button>
             </li>
-            <li data-name="Spinach" data-farmer="Amina's Farm" data-availability="available">
+            <li data-name="Spinach" data-farmer="Amina's Farm" data-availability="available" data-category="greens">
               <img src="product-2.png" alt="Spinach">
               <h3>Spinach</h3>
               <small>By Amina's Farm</small>
@@ -78,12 +98,13 @@
               <div class="rating" aria-label="5 out of 5 stars">★★★★★</div>
               <span class="badge available">In Stock</span>
               <div class="qty-wrapper">
-                <label for="qty-spinach">Qty:</label>
+                <button type="button" class="qty-minus" aria-label="Decrease quantity for Spinach">−</button>
                 <input type="number" id="qty-spinach" class="qty-input" min="1" value="1" aria-label="Quantity for Spinach">
+                <button type="button" class="qty-plus" aria-label="Increase quantity for Spinach">+</button>
               </div>
               <button type="button" class="add-to-cart" data-name="Spinach" data-price="30" data-farmer="Amina's Farm" data-availability="available">Add to Cart</button>
             </li>
-            <li data-name="Zucchini" data-farmer="Amina's Farm" data-availability="available">
+            <li data-name="Zucchini" data-farmer="Amina's Farm" data-availability="available" data-category="vegetables">
               <img src="product-3.png" alt="Zucchini">
               <h3>Zucchini</h3>
               <small>By Amina's Farm</small>
@@ -91,8 +112,9 @@
               <div class="rating" aria-label="4 out of 5 stars">★★★★☆</div>
               <span class="badge available">In Stock</span>
               <div class="qty-wrapper">
-                <label for="qty-zucchini">Qty:</label>
+                <button type="button" class="qty-minus" aria-label="Decrease quantity for Zucchini">−</button>
                 <input type="number" id="qty-zucchini" class="qty-input" min="1" value="1" aria-label="Quantity for Zucchini">
+                <button type="button" class="qty-plus" aria-label="Increase quantity for Zucchini">+</button>
               </div>
               <button type="button" class="add-to-cart" data-name="Zucchini" data-price="110" data-farmer="Amina's Farm" data-availability="available">Add to Cart</button>
             </li>
@@ -136,7 +158,10 @@
       </div>
 
       <section id="cart" class="cart">
-        <h2>Cart</h2>
+        <div class="cart-header">
+          <span>🛒 Cart</span>
+          <span class="cart-header-count">(<span id="cart-header-count">0</span> items)</span>
+        </div>
         <ul aria-label="Cart items">
           <li class="empty-cart-msg">Your cart is empty.</li>
         </ul>
@@ -171,17 +196,35 @@
     </main>
 
     <footer>
-      <p>&copy; 2026 Farm Fresh. All rights reserved.</p>
-      <nav aria-label="Footer navigation">
-        <ul>
-          <li><a href="#">Home</a></li>
-          <li><a href="#products">Shop</a></li>
-          <li><a href="#farmers">Farmers</a></li>
-          <li><a href="#reviews">Reviews</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
-      </nav>
+      <div class="footer-main">
+        <div class="footer-col">
+          <h4>Farm Fresh</h4>
+          <p>Connecting you with local Kenyan farmers for the freshest organic produce, delivered to your doorstep.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <nav aria-label="Footer navigation">
+            <ul>
+              <li><a href="#">Home</a></li>
+              <li><a href="#products">Shop</a></li>
+              <li><a href="#farmers">Farmers</a></li>
+              <li><a href="#reviews">Reviews</a></li>
+              <li><a href="#">Contact</a></li>
+            </ul>
+          </nav>
+        </div>
+        <div class="footer-col">
+          <h4>Contact Us</h4>
+          <p>📧 hello@farmfresh.co.ke</p>
+          <p>📞 +254 712 345 678</p>
+          <p>📍 Nairobi, Kenya</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Farm Fresh. All rights reserved.</p>
+      </div>
     </footer>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="script.js"></script>
   </body>
 </html>

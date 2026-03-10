@@ -37,6 +37,7 @@ addToCartButtons.forEach(button => {
     }
 
     updateCartDisplay();
+    showToast(`✅ ${name} added to cart`);
   });
 });
 
@@ -51,6 +52,8 @@ function updateCartDisplay() {
     checkoutButton.style.display = 'none';
     cartTotal.textContent = '0.00';
     if (cartCountBadge) cartCountBadge.textContent = '0';
+    const cartHeaderCount = document.getElementById('cart-header-count');
+    if (cartHeaderCount) cartHeaderCount.textContent = '0';
     return;
   }
 
@@ -83,6 +86,8 @@ function updateCartDisplay() {
   if (cartCountBadge) {
     cartCountBadge.textContent = totalQty;
   }
+  const cartHeaderCount = document.getElementById('cart-header-count');
+  if (cartHeaderCount) cartHeaderCount.textContent = totalQty;
 
   checkoutButton.style.display = cartItems.length === 0 ? 'none' : 'block';
 }
@@ -191,3 +196,51 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
+
+// ===== Toast Notification =====
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ===== Category Filter Logic =====
+const filterButtons = document.querySelectorAll('.filter-btn');
+filterButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+    document.querySelectorAll('.product-list ul li').forEach(li => {
+      const cat = li.dataset.category || 'all';
+      li.style.display = (filter === 'all' || cat === filter) ? '' : 'none';
+    });
+  });
+});
+
+// ===== Hamburger Menu Toggle =====
+const hamburger = document.querySelector('.hamburger');
+const headerEl = document.querySelector('header');
+if (hamburger && headerEl) {
+  hamburger.addEventListener('click', () => {
+    headerEl.classList.toggle('nav-open');
+  });
+}
+
+// ===== Quantity Stepper (+/−) =====
+document.querySelectorAll('.product-list ul li').forEach(li => {
+  const minusBtn = li.querySelector('.qty-minus');
+  const plusBtn = li.querySelector('.qty-plus');
+  const input = li.querySelector('.qty-input');
+  if (!minusBtn || !plusBtn || !input) return;
+  minusBtn.addEventListener('click', () => {
+    const current = parseInt(input.value, 10) || 1;
+    if (current > 1) input.value = current - 1;
+  });
+  plusBtn.addEventListener('click', () => {
+    const current = parseInt(input.value, 10) || 1;
+    input.value = current + 1;
+  });
+});
