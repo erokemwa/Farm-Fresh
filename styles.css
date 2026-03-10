@@ -603,6 +603,57 @@ footer nav a:hover {
 
   .cart {
     width: 100%;
+}
+
+.empty-cart-msg {
+  color: #888;
+  font-style: italic;
+}
+
+.add-to-cart {
+  background-color: #198C19;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-to-cart:hover {
+  background-color: #146e14;
+}
+
+.checkout {
+  background-color: #e67e00;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.checkout:hover {
+  background-color: #c96e00;
+}
+
+header h1 {
+  color: #fff;
+}
+
+footer {
+  background-color: #198C19;
+  color: #fff;
+  text-align: center;
+  padding: 15px 20px;
+}
+
+@media (max-width: 768px) {
+  main {
+    flex-direction: column;
+  }
+
+  .cart {
     margin-left: 0;
   }
 }

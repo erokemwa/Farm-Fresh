@@ -15,6 +15,7 @@ const checkoutForm = document.getElementById('checkout-form');
 let cartItems = [];
 
 // Hide checkout button on page load
+// Hide the checkout button on page load since the cart starts empty
 checkoutButton.style.display = 'none';
 
 // Add event listeners to all "add to cart" buttons
@@ -39,11 +40,11 @@ addToCartButtons.forEach(button => {
   });
 });
 
-// Update the cart display with the current cart items and total price
 function updateCartDisplay() {
   cartList.innerHTML = '';
 
   if (cartItems.length === 0) {
+    // Show the empty cart message
     const emptyMsg = document.createElement('li');
     emptyMsg.className = 'empty-cart-msg';
     emptyMsg.textContent = 'Your cart is empty.';
@@ -52,6 +53,17 @@ function updateCartDisplay() {
     // Add each cart item to the cart list
     cartItems.forEach(item => {
       const listItem = document.createElement('li');
+    checkoutButton.style.display = 'none';
+    cartTotal.textContent = '0.00';
+    return;
+  }
+
+  // Add each cart item to the cart list
+  cartItems.forEach(item => {
+    const listItem = document.createElement('li');
+    listItem.textContent = `${item.name} - KES ${item.price}`;
+    cartList.appendChild(listItem);
+  });
 
       const textSpan = document.createElement('span');
       textSpan.textContent = `${item.name} x${item.quantity} - ${formatKES(item.price * item.quantity)}`;
@@ -85,6 +97,8 @@ function updateCartDisplay() {
 
   // Show or hide the checkout button based on whether the cart is empty
   checkoutButton.style.display = cartItems.length === 0 ? 'none' : 'block';
+  // Show the checkout button
+  checkoutButton.style.display = 'block';
 }
 
 // Add event listener to the checkout button — show payment form
