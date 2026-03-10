@@ -44,61 +44,47 @@ function updateCartDisplay() {
   cartList.innerHTML = '';
 
   if (cartItems.length === 0) {
-    // Show the empty cart message
     const emptyMsg = document.createElement('li');
     emptyMsg.className = 'empty-cart-msg';
     emptyMsg.textContent = 'Your cart is empty.';
     cartList.appendChild(emptyMsg);
-  } else {
-    // Add each cart item to the cart list
-    cartItems.forEach(item => {
-      const listItem = document.createElement('li');
     checkoutButton.style.display = 'none';
     cartTotal.textContent = '0.00';
+    if (cartCountBadge) cartCountBadge.textContent = '0';
     return;
   }
 
-  // Add each cart item to the cart list
   cartItems.forEach(item => {
     const listItem = document.createElement('li');
-    listItem.textContent = `${item.name} - KES ${item.price}`;
+
+    const textSpan = document.createElement('span');
+    textSpan.textContent = `${item.name} x${item.quantity} - ${formatKES(item.price * item.quantity)}`;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = 'Remove';
+    removeBtn.className = 'remove-btn';
+    removeBtn.type = 'button';
+    removeBtn.setAttribute('aria-label', `Remove ${item.name} from cart`);
+    const itemName = item.name;
+    removeBtn.addEventListener('click', () => {
+      cartItems = cartItems.filter(i => i.name !== itemName);
+      updateCartDisplay();
+    });
+
+    listItem.appendChild(textSpan);
+    listItem.appendChild(removeBtn);
     cartList.appendChild(listItem);
   });
 
-      const textSpan = document.createElement('span');
-      textSpan.textContent = `${item.name} x${item.quantity} - ${formatKES(item.price * item.quantity)}`;
-
-      const removeBtn = document.createElement('button');
-      removeBtn.textContent = 'Remove';
-      removeBtn.className = 'remove-btn';
-      removeBtn.type = 'button';
-      removeBtn.setAttribute('aria-label', `Remove ${item.name} from cart`);
-      const itemName = item.name;
-      removeBtn.addEventListener('click', () => {
-        cartItems = cartItems.filter(i => i.name !== itemName);
-        updateCartDisplay();
-      });
-
-      listItem.appendChild(textSpan);
-      listItem.appendChild(removeBtn);
-      cartList.appendChild(listItem);
-    });
-  }
-
-  // Calculate the total price of all items in the cart
   const total = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   cartTotal.textContent = total.toFixed(2);
 
-  // Update cart count badge
   const totalQty = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   if (cartCountBadge) {
     cartCountBadge.textContent = totalQty;
   }
 
-  // Show or hide the checkout button based on whether the cart is empty
   checkoutButton.style.display = cartItems.length === 0 ? 'none' : 'block';
-  // Show the checkout button
-  checkoutButton.style.display = 'block';
 }
 
 // Add event listener to the checkout button — show payment form
