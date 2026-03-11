@@ -63,24 +63,20 @@ function getFarmer() {
   return farmers.find(function (f) { return f.id === sessionId; }) || null;
 }
 
-function getMyProducts(farmerName) {
+function getMyProducts(farmerId) {
   var products = getStore('ff_products');
-  return products.filter(function (p) { return p.farmer === farmerName; });
+  return products.filter(function (p) { return p.farmerId === farmerId; });
 }
 
-function getMyOrders(farmerName) {
+function getMyOrders(farmerId) {
   var orders = getStore('ff_orders');
-  var myProducts = getMyProducts(farmerName);
-  var myProductNames = myProducts.map(function (p) { return p.name; });
   return orders.filter(function (o) {
-    return o.items.some(function (item) { return myProductNames.indexOf(item.name) !== -1; });
+    return o.items.some(function (item) { return item.farmerId === farmerId; });
   });
 }
 
-function getMyItemsInOrder(order, farmerName) {
-  var myProducts = getMyProducts(farmerName);
-  var myProductNames = myProducts.map(function (p) { return p.name; });
-  return order.items.filter(function (item) { return myProductNames.indexOf(item.name) !== -1; });
+function getMyItemsInOrder(order, farmerId) {
+  return order.items.filter(function (item) { return item.farmerId === farmerId; });
 }
 
 /* ===== Tab Switching ===== */
@@ -115,15 +111,15 @@ function switchTab(tabId) {
 
 /* ===== Overview Tab ===== */
 function renderOverview(farmer) {
-  var myProducts = getMyProducts(farmer.name);
-  var myOrders = getMyOrders(farmer.name);
+  var myProducts = getMyProducts(farmer.id);
+  var myOrders = getMyOrders(farmer.id);
 
   var activeOrders = myOrders.filter(function (o) { return o.status !== 'Delivered'; });
   var deliveredOrders = myOrders.filter(function (o) { return o.status === 'Delivered'; });
 
   var totalEarnings = deliveredOrders.reduce(function (sum, o) {
-    var myItems = getMyItemsInOrder(o, farmer.name);
-    return sum + myItems.reduce(function (s, i) { return s + (i.price * i.quantity); }, 0);
+    var myItems = getMyItemsInOrder(o, farmer.id);
+    return sum + myItems.reduce(function (s, i) { return s + (i.subtotal || i.price * i.quantity); }, 0);
   }, 0);
 
   var statEl = function (id, val) {
@@ -145,9 +141,9 @@ function renderOverview(farmer) {
     return;
   }
   tbody.innerHTML = recent.map(function (o) {
-    var myItems = getMyItemsInOrder(o, farmer.name);
+    var myItems = getMyItemsInOrder(o, farmer.id);
     var itemsStr = myItems.map(function (i) { return escapeHtml(i.name) + ' x' + escapeHtml(String(i.quantity)); }).join(', ');
-    var subtotal = myItems.reduce(function (s, i) { return s + i.price * i.quantity; }, 0);
+    var subtotal = myItems.reduce(function (s, i) { return s + (i.subtotal || i.price * i.quantity); }, 0);
     return '<tr>' +
       '<td>' + escapeHtml(o.id) + '</td>' +
       '<td>' + escapeHtml(o.customer) + '</td>' +
@@ -163,7 +159,7 @@ function renderOverview(farmer) {
 var editingProductId = null;
 
 function renderMyProducts(farmer) {
-  var myProducts = getMyProducts(farmer.name);
+  var myProducts = getMyProducts(farmer.id);
   var tbody = document.getElementById('my-products-body');
   if (!tbody) return;
 
@@ -250,7 +246,7 @@ function toggleMyProduct(id) {
 
 /* ===== My Orders Tab ===== */
 function renderMyOrders(farmer) {
-  var myOrders = getMyOrders(farmer.name);
+  var myOrders = getMyOrders(farmer.id);
   var statusFilter = document.getElementById('orders-status-filter');
   var selectedStatus = statusFilter ? statusFilter.value : 'all';
 
@@ -265,9 +261,9 @@ function renderMyOrders(farmer) {
   }
 
   tbody.innerHTML = filtered.map(function (o) {
-    var myItems = getMyItemsInOrder(o, farmer.name);
+    var myItems = getMyItemsInOrder(o, farmer.id);
     var itemsStr = myItems.map(function (i) { return escapeHtml(i.name) + ' x' + escapeHtml(String(i.quantity)); }).join(', ');
-    var subtotal = myItems.reduce(function (s, i) { return s + i.price * i.quantity; }, 0);
+    var subtotal = myItems.reduce(function (s, i) { return s + (i.subtotal || i.price * i.quantity); }, 0);
     return '<tr>' +
       '<td>' + escapeHtml(o.id) + '</td>' +
       '<td>' + escapeHtml(o.customer) + '</td>' +
@@ -283,7 +279,7 @@ function renderMyOrders(farmer) {
 
 /* ===== Shipping Tab ===== */
 function renderShipping(farmer) {
-  var myOrders = getMyOrders(farmer.name);
+  var myOrders = getMyOrders(farmer.id);
   var activeOrders = myOrders.filter(function (o) { return o.status !== 'Delivered'; });
 
   var container = document.getElementById('farmer-shipping-cards');
@@ -295,9 +291,19 @@ function renderShipping(farmer) {
   }
 
   container.innerHTML = activeOrders.map(function (o) {
-    var myItems = getMyItemsInOrder(o, farmer.name);
-    var itemsStr = myItems.map(function (i) { return escapeHtml(i.name) + ' ×' + escapeHtml(String(i.quantity)); }).join(', ');
-    var subtotal = myItems.reduce(function (s, i) { return s + i.price * i.quantity; }, 0);
+    var myItems = getMyItemsInOrder(o, farmer.id);
+    var subtotal = myItems.reduce(function (s, i) { return s + (i.subtotal || i.price * i.quantity); }, 0);
+    var itemsHtml = myItems.map(function (i) {
+      var safeOrderId = escapeHtml(JSON.stringify(o.id));
+      var safeItemName = escapeHtml(JSON.stringify(i.name));
+      var currentItemStatus = i.itemStatus || o.status;
+      var opts = ['Pending', 'Confirmed', 'Dispatched', 'Delivered'];
+      var selectHtml = '<select class="status-select" style="padding:2px 4px;font-size:0.78rem;" onchange="updateMyItemStatus(' + safeOrderId + ',' + safeItemName + ',this.value)">' +
+        opts.map(function (s) {
+          return '<option value="' + escapeHtml(s) + '"' + (s === currentItemStatus ? ' selected' : '') + '>' + escapeHtml(s) + '</option>';
+        }).join('') + '</select>';
+      return '<li style="font-size:0.82rem;margin:2px 0;">' + escapeHtml(i.name) + ' \xD7' + escapeHtml(String(i.quantity)) + ' ' + selectHtml + '</li>';
+    }).join('');
     return '<div class="shipping-card">' +
       '<h4>' + escapeHtml(o.id) + '</h4>' +
       '<p class="shipping-customer">👤 ' + escapeHtml(o.customer) + '</p>' +
@@ -305,20 +311,42 @@ function renderShipping(farmer) {
       '<p style="font-size:0.82rem;color:#555;margin:4px 0 2px;">📍 ' + escapeHtml(o.address) + '</p>' +
       '<p style="font-size:0.82rem;color:#555;margin:2px 0 2px;">📞 ' + escapeHtml(o.phone) + '</p>' +
       '<p style="font-size:0.82rem;color:#555;margin:2px 0 2px;">📅 ' + escapeHtml(o.date) + '</p>' +
-      '<p style="font-size:0.82rem;margin:4px 0 2px;"><strong>My items:</strong> ' + itemsStr + '</p>' +
+      '<p style="font-size:0.82rem;margin:4px 0 2px;"><strong>My items:</strong></p>' +
+      '<ul style="margin:2px 0 4px;padding-left:16px;">' + itemsHtml + '</ul>' +
       '<p style="font-size:0.82rem;font-weight:700;color:#333;margin:2px 0 0;">Subtotal: ' + formatKES(subtotal) + '</p>' +
       '</div>';
   }).join('');
 }
 
+function updateMyItemStatus(orderId, itemName, newItemStatus) {
+  var orders = getStore('ff_orders');
+  var order = orders.find(function (o) { return o.id === orderId; });
+  if (order) {
+    var item = order.items.find(function (i) { return i.name === itemName; });
+    if (item) {
+      item.itemStatus = newItemStatus;
+      // Update overall order status to worst (least advanced)
+      var statusRank = ['Pending', 'Confirmed', 'Dispatched', 'Delivered'];
+      var worstIdx = order.items.reduce(function (worst, i) {
+        var idx = statusRank.indexOf(i.itemStatus || 'Pending');
+        return idx < worst ? idx : worst;
+      }, statusRank.length - 1);
+      order.status = statusRank[worstIdx];
+      setStore('ff_orders', orders);
+      var farmer = getFarmer();
+      if (farmer) renderShipping(farmer);
+    }
+  }
+}
+
 /* ===== Earnings Tab ===== */
 function renderEarnings(farmer) {
-  var myOrders = getMyOrders(farmer.name);
+  var myOrders = getMyOrders(farmer.id);
 
   var calcRevenue = function (orders) {
     return orders.reduce(function (sum, o) {
-      var myItems = getMyItemsInOrder(o, farmer.name);
-      return sum + myItems.reduce(function (s, i) { return s + i.price * i.quantity; }, 0);
+      var myItems = getMyItemsInOrder(o, farmer.id);
+      return sum + myItems.reduce(function (s, i) { return s + (i.subtotal || i.price * i.quantity); }, 0);
     }, 0);
   };
 
@@ -342,9 +370,9 @@ function renderEarnings(farmer) {
       tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No delivered orders yet.</td></tr>';
     } else {
       tbody.innerHTML = deliveredOrders.map(function (o) {
-        var myItems = getMyItemsInOrder(o, farmer.name);
+        var myItems = getMyItemsInOrder(o, farmer.id);
         var itemsStr = myItems.map(function (i) { return escapeHtml(i.name) + ' x' + escapeHtml(String(i.quantity)); }).join(', ');
-        var subtotal = myItems.reduce(function (s, i) { return s + i.price * i.quantity; }, 0);
+        var subtotal = myItems.reduce(function (s, i) { return s + (i.subtotal || i.price * i.quantity); }, 0);
         return '<tr>' +
           '<td>' + escapeHtml(o.id) + '</td>' +
           '<td>' + itemsStr + '</td>' +
@@ -359,8 +387,8 @@ function renderEarnings(farmer) {
   var monthlyMap = {};
   deliveredOrders.forEach(function (o) {
     var month = (o.date && o.date.length >= 7) ? o.date.slice(0, 7) : 'Unknown';
-    var myItems = getMyItemsInOrder(o, farmer.name);
-    var subtotal = myItems.reduce(function (s, i) { return s + i.price * i.quantity; }, 0);
+    var myItems = getMyItemsInOrder(o, farmer.id);
+    var subtotal = myItems.reduce(function (s, i) { return s + (i.subtotal || i.price * i.quantity); }, 0);
     monthlyMap[month] = (monthlyMap[month] || 0) + subtotal;
   });
 
@@ -423,6 +451,7 @@ function initAddProductForm(farmer) {
       products.push({
         id: 'p' + Date.now(),
         name: name,
+        farmerId: farmer.id,
         farmer: farmer.name,
         price: price,
         originalPrice: origPrice,

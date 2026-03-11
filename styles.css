@@ -1355,6 +1355,47 @@ footer {
 .receipt-badge-dispatched { background: #f3e8ff; color: #7e22ce; }
 .receipt-badge-delivered { background: #dcfce7; color: #166534; }
 
+/* ===== Receipt Farmer Attribution ===== */
+small.receipt-farmer {
+  color: #4a7c59;
+  font-size: 0.8rem;
+  font-style: italic;
+  margin-left: 4px;
+}
+
+.receipt-farmer-group-header td {
+  background: var(--green-light);
+  color: var(--green-dark);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 4px 8px;
+}
+
+/* ===== Track Order Farmer Groups ===== */
+.track-farmer-group {
+  margin: 8px 0;
+  padding: 8px 12px;
+  background: #fff;
+  border-radius: 6px;
+  border-left: 3px solid var(--green);
+}
+
+.track-farmer-group h4 {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+  color: var(--green-dark);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.track-farmer-group ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.88rem;
+  color: #444;
+}
+
 /* ===== Print Receipt Button ===== */
 .btn-print-receipt {
   display: block;
