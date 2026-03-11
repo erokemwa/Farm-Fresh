@@ -104,6 +104,42 @@
           ✅ Order placed! Thank you for shopping with Farm Fresh.<br>
           <small>We'll call you to confirm. Expected delivery: within 24 hours.</small>
         </div>
+
+        <!-- Receipt Block (shown after order confirmation) -->
+        <div id="receipt-block" class="receipt-block" hidden>
+          <div class="receipt-header">
+            <h2 class="receipt-logo">🌿 Farm Fresh</h2>
+            <p class="receipt-tagline">Fresh from the farm, straight to your door</p>
+            <p class="receipt-meta" id="receipt-meta"></p>
+          </div>
+          <table class="receipt-table" id="receipt-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="receipt-items"></tbody>
+            <tfoot>
+              <tr class="receipt-total-row">
+                <td colspan="3"><strong>Grand Total</strong></td>
+                <td id="receipt-grand-total"></td>
+              </tr>
+            </tfoot>
+          </table>
+          <div class="receipt-delivery">
+            <p><strong>Delivery to:</strong> <span id="receipt-address"></span></p>
+            <p><strong>Contact:</strong> <span id="receipt-phone"></span></p>
+          </div>
+          <p class="receipt-footer-note">Thank you for shopping with Farm Fresh! 🌿<br>Expected delivery: within 24 hours.</p>
+        </div>
+
+        <!-- Print Receipt Button -->
+        <button type="button" id="btn-print-receipt" class="btn-print-receipt" hidden>
+          🖨️ Print Receipt
+        </button>
         <p class="secure-checkout-label">🔒 Secure Checkout</p>
         <button type="button" class="checkout">Checkout</button>
 
