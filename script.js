@@ -138,8 +138,23 @@ var PRODUCT_IMAGES = { 'p1': 'product-1.png', 'p2': 'product-2.png', 'p3': 'prod
 
 // ===== Constants =====
 var KENYAN_PHONE_RE = /^0[17]\d{8}$/;
-var KES_TO_USD_RATE = 130;
-var BTC_USD_PRICE = 60000;
+
+// Payment configuration — update these values before going live
+// Exchange rates are stubs (last updated 2026-03): replace with a live-rate API in production
+var PAYMENT_CONFIG = {
+  // Simulated delay (ms) for M-Pesa STK push before advancing to confirmation
+  mpesaStkDelay: 4000,
+  // Simulated delay (ms) for card processing before advancing to confirmation
+  cardProcessDelay: 2000,
+  // KES → USD stub rate (1 USD = 130 KES); replace with a live FX feed in production
+  kesPerUsd: 130,
+  // BTC stub price in USD; replace with a live price feed in production
+  btcUsdPrice: 60000,
+  // DEMO ONLY — mock wallet addresses; replace with real custodial addresses in production
+  // WARNING: Do NOT use these in a live payment flow without replacing with verified addresses
+  usdtWalletAddress: 'TRC20Walletxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+  btcWalletAddress:  'bc1qxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+};
 
 // ===== Render Products from localStorage =====
 function renderProducts() {
@@ -710,7 +725,7 @@ function initMpesaPanel() {
       if (spinnerMsg) spinnerMsg.hidden = true;
       btn.disabled = false;
       placeOrder('M-Pesa', phone);
-    }, 4000);
+    }, PAYMENT_CONFIG.mpesaStkDelay);
   };
 }
 
@@ -787,7 +802,7 @@ function initCardPanel() {
         if (spinnerMsg) spinnerMsg.hidden = true;
         btnPayCard.disabled = false;
         placeOrder('Card', maskedDetail);
-      }, 2000);
+      }, PAYMENT_CONFIG.cardProcessDelay);
     };
   }
 }
@@ -832,7 +847,7 @@ function updateCryptoPanel() {
   var coinRadio = document.querySelector('input[name="crypto-coin"]:checked');
   var coin = coinRadio ? coinRadio.value : 'usdt';
   var t = computeTotals();
-  var usd = t.grand / KES_TO_USD_RATE;
+  var usd = t.grand / PAYMENT_CONFIG.kesPerUsd;
   var amountDisplay = document.getElementById('crypto-amount-display');
   var addrEl = document.getElementById('crypto-address');
   var noteEl = document.getElementById('crypto-note');
@@ -840,15 +855,16 @@ function updateCryptoPanel() {
   if (coin === 'usdt') {
     var usdt = usd.toFixed(2);
     if (amountDisplay) amountDisplay.textContent = usdt + ' USDT (TRC-20)  ≈  ' + formatKES(t.grand);
-    if (addrEl) addrEl.value = 'TRC20Walletxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'; // Mock address — replace with real wallet in production
+    if (addrEl) addrEl.value = PAYMENT_CONFIG.usdtWalletAddress; // Demo address — replace in production
     if (noteEl) noteEl.textContent = 'Send exactly ' + usdt + ' USDT (TRC-20) to the address above. Payment confirmed after 1 network confirmation (~1 min).';
   } else {
-    var btc = (usd / BTC_USD_PRICE).toFixed(8);
+    var btc = (usd / PAYMENT_CONFIG.btcUsdPrice).toFixed(8);
     if (amountDisplay) amountDisplay.textContent = btc + ' BTC  ≈  ' + formatKES(t.grand);
-    if (addrEl) addrEl.value = 'bc1qxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'; // Mock address — replace with real wallet in production
+    if (addrEl) addrEl.value = PAYMENT_CONFIG.btcWalletAddress; // Demo address — replace in production
     if (noteEl) noteEl.textContent = 'Send exactly ' + btc + ' BTC to the address above. Payment confirmed after 1 block confirmation (~10 min).';
   }
-  // Generate a mock QR visual (CSS grid) with finder patterns in corners — not a valid QR code
+  // NOTE: This QR grid is purely decorative — it does NOT generate a valid, scannable QR code.
+  // For production, replace with a QR code library (e.g. qrcode.js).
   if (qrGrid) {
     var cells = '';
     for (var row = 0; row < 10; row++) {
