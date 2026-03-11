@@ -34,6 +34,9 @@
           <a class="nav-link" href="javascript:void(0)" data-tab="reviews" role="button" tabindex="0">
             <span class="nav-icon">⭐</span> Reviews
           </a>
+          <a class="nav-link" href="javascript:void(0)" data-tab="shipping" role="button" tabindex="0">
+            <span class="nav-icon">🚚</span> Shipping
+          </a>
         </nav>
       </aside>
 
@@ -190,6 +193,46 @@
               </thead>
               <tbody id="reviews-body">
                 <tr class="empty-row"><td colspan="5">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== Shipping Tab ===== -->
+        <section id="tab-shipping" class="admin-section">
+          <h2>Shipping Management</h2>
+          <div class="admin-filter-bar">
+            <label for="shipping-status-filter" class="filter-label">Filter by Status:</label>
+            <select id="shipping-status-filter" class="admin-select">
+              <option value="all">All</option>
+              <option value="Pending">Pending</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Dispatched">Dispatched</option>
+              <option value="Delivered">Delivered</option>
+            </select>
+            <label for="shipping-farmer-filter" class="filter-label">Filter by Farmer:</label>
+            <select id="shipping-farmer-filter" class="admin-select">
+              <option value="all">All Farmers</option>
+            </select>
+          </div>
+          <div id="shipping-cards-container" class="shipping-cards-grid"></div>
+          <h3 style="margin-top:32px;color:var(--green);">Shipping Report</h3>
+          <div class="table-wrapper">
+            <table class="admin-table" id="shipping-report-table" aria-label="Shipping report">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Farmer(s)</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Update Status</th>
+                </tr>
+              </thead>
+              <tbody id="shipping-report-tbody">
+                <tr class="empty-row"><td colspan="8">Loading…</td></tr>
               </tbody>
             </table>
           </div>

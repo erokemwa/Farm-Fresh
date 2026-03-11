@@ -49,7 +49,8 @@ function seedAdminData() {
     setStore('ff_orders', [
       { id: 'ord-001', customer: 'Grace Njeri', phone: '0712345678', address: '14 Moi Avenue, Nairobi', items: [{ name: 'Tomatoes', quantity: 2, price: 100 }], total: 200, status: 'Delivered', date: '2026-03-01' },
       { id: 'ord-002', customer: 'Brian Omondi', phone: '0723456789', address: 'Westlands, Nairobi', items: [{ name: 'Spinach', quantity: 3, price: 30 }], total: 90, status: 'Confirmed', date: '2026-03-08' },
-      { id: 'ord-003', customer: 'Faith Wambua', phone: '0734567890', address: 'Karen, Nairobi', items: [{ name: 'Zucchini', quantity: 1, price: 110 }], total: 110, status: 'Pending', date: '2026-03-10' }
+      { id: 'ord-003', customer: 'Faith Wambua', phone: '0734567890', address: 'Karen, Nairobi', items: [{ name: 'Zucchini', quantity: 1, price: 110 }], total: 110, status: 'Pending', date: '2026-03-10' },
+      { id: 'ord-004', customer: 'Mary Akinyi', phone: '0745678901', address: 'Kilimani, Nairobi', items: [{ name: 'Tomatoes', quantity: 3, price: 100 }], total: 300, status: 'Dispatched', date: '2026-03-09' }
     ]);
   }
   if (!localStorage.getItem('ff_reviews')) {
@@ -394,7 +395,10 @@ if (checkoutForm) {
 
     if (receiptBlock) {
       var orderDate = new Date().toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' });
-      if (receiptMeta) receiptMeta.textContent = 'Order ID: ' + newOrderId + '  |  Date: ' + orderDate;
+      if (receiptMeta) receiptMeta.innerHTML = 'Order ID: <strong>' + escapeHtml(newOrderId) + '</strong> &nbsp;|&nbsp; Date: ' + escapeHtml(orderDate);
+
+      var receiptCustomer = document.getElementById('receipt-customer');
+      if (receiptCustomer) receiptCustomer.textContent = 'Customer: ' + name;
 
       if (receiptItems) {
         receiptItems.innerHTML = cartItems.map(function (i) {
@@ -410,6 +414,19 @@ if (checkoutForm) {
       if (receiptGrandTotal) receiptGrandTotal.textContent = formatKES(totalValue);
       if (receiptAddress) receiptAddress.textContent = address;
       if (receiptPhone) receiptPhone.textContent = phone;
+
+      // Shipping status badge
+      var receiptStatusBadge = document.getElementById('receipt-status-badge');
+      if (receiptStatusBadge) {
+        var currentOrders = getStore('ff_orders');
+        var thisOrder = currentOrders.find(function (o) { return o.id === newOrderId; });
+        var status = thisOrder ? thisOrder.status : 'Pending';
+        var badgeCls = 'receipt-badge-pending';
+        if (status === 'Confirmed') badgeCls = 'receipt-badge-confirmed';
+        else if (status === 'Dispatched') badgeCls = 'receipt-badge-dispatched';
+        else if (status === 'Delivered') badgeCls = 'receipt-badge-delivered';
+        receiptStatusBadge.innerHTML = '<span class="receipt-status-badge ' + badgeCls + '">' + escapeHtml(status) + '</span>';
+      }
 
       receiptBlock.hidden = false;
       if (btnPrintReceipt) btnPrintReceipt.hidden = false;
@@ -540,6 +557,78 @@ if (hamburger && headerEl) {
   hamburger.addEventListener('click', function () {
     headerEl.classList.toggle('nav-open');
   });
+}
+
+// ===== Track Order functionality =====
+var btnTrackOrder = document.getElementById('btn-track-order');
+if (btnTrackOrder) {
+  btnTrackOrder.addEventListener('click', function () {
+    var input = document.getElementById('track-order-id');
+    var resultEl = document.getElementById('track-result');
+    if (!input || !resultEl) return;
+
+    var orderId = input.value.trim();
+    if (!orderId) {
+      resultEl.innerHTML = '<p class="track-error">Please enter an Order ID.</p>';
+      resultEl.hidden = false;
+      return;
+    }
+
+    var orders = getStore('ff_orders');
+    var order = orders.find(function (o) { return o.id === orderId; });
+
+    if (!order) {
+      resultEl.innerHTML = '<p class="track-error">Order not found. Please check your Order ID.</p>';
+      resultEl.hidden = false;
+      return;
+    }
+
+    var steps = ['Pending', 'Confirmed', 'Dispatched', 'Delivered'];
+    var currentIdx = steps.indexOf(order.status);
+
+    var stepsHtml = '<div class="shipping-steps">';
+    steps.forEach(function (step, i) {
+      var done = i <= currentIdx;
+      stepsHtml += '<div class="shipping-step">' +
+        '<div class="step-circle' + (done ? ' done' : '') + '">' + (i + 1) + '</div>' +
+        '<div class="step-label' + (done ? ' done' : '') + '">' + escapeHtml(step) + '</div>' +
+        '</div>';
+      if (i < steps.length - 1) {
+        stepsHtml += '<div class="step-connector' + (done && currentIdx > i ? ' done' : '') + '"></div>';
+      }
+    });
+    stepsHtml += '</div>';
+
+    var statusCls = 'receipt-badge-pending';
+    if (order.status === 'Confirmed') statusCls = 'receipt-badge-confirmed';
+    else if (order.status === 'Dispatched') statusCls = 'receipt-badge-dispatched';
+    else if (order.status === 'Delivered') statusCls = 'receipt-badge-delivered';
+
+    var itemsHtml = order.items.map(function (i) {
+      return '<li>' + escapeHtml(i.name) + ' &times; ' + escapeHtml(String(i.quantity)) + '</li>';
+    }).join('');
+
+    resultEl.innerHTML =
+      '<div class="track-card">' +
+        '<h3>Order ' + escapeHtml(order.id) + '</h3>' +
+        '<p><strong>Date:</strong> ' + escapeHtml(order.date) + '</p>' +
+        '<p><strong>Customer:</strong> ' + escapeHtml(order.customer) + '</p>' +
+        stepsHtml +
+        '<p>📍 <strong>Delivery Address:</strong> ' + escapeHtml(order.address) + '</p>' +
+        '<p><strong>Items ordered:</strong></p><ul style="margin:4px 0 8px;padding-left:20px;font-size:0.9rem;">' + itemsHtml + '</ul>' +
+        '<p><strong>Total:</strong> ' + formatKES(order.total) + '</p>' +
+        '<p><strong>Status:</strong> <span class="receipt-status-badge ' + statusCls + '">' + escapeHtml(order.status) + '</span></p>' +
+      '</div>';
+    resultEl.hidden = false;
+  });
+
+  // Allow Enter key in track input
+  var trackInput = document.getElementById('track-order-id');
+  if (trackInput) {
+    trackInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') btnTrackOrder.click();
+    });
+  }
 }
 
 // ===== Init: Seed → Render → Attach Listeners =====

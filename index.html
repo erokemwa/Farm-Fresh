@@ -32,6 +32,7 @@
             <li><a href="#farmers">Farmers</a></li>
             <li><a href="#reviews">Reviews</a></li>
             <li><a href="#contact">Contact</a></li>
+            <li><a href="farmer-dashboard.html">Farmer Portal</a></li>
           </ul>
         </nav>
       </div>
@@ -110,7 +111,9 @@
           <div class="receipt-header">
             <h2 class="receipt-logo">🌿 Farm Fresh</h2>
             <p class="receipt-tagline">Fresh from the farm, straight to your door</p>
+            <hr class="receipt-divider">
             <p class="receipt-meta" id="receipt-meta"></p>
+            <p class="receipt-customer" id="receipt-customer"></p>
           </div>
           <table class="receipt-table" id="receipt-table">
             <thead>
@@ -118,7 +121,7 @@
                 <th>Item</th>
                 <th>Qty</th>
                 <th>Unit Price</th>
-                <th>Total</th>
+                <th>Subtotal</th>
               </tr>
             </thead>
             <tbody id="receipt-items"></tbody>
@@ -130,10 +133,19 @@
             </tfoot>
           </table>
           <div class="receipt-delivery">
-            <p><strong>Delivery to:</strong> <span id="receipt-address"></span></p>
-            <p><strong>Contact:</strong> <span id="receipt-phone"></span></p>
+            <p>📍 <strong>Delivery Address:</strong> <span id="receipt-address"></span></p>
+            <p>📞 <strong>Phone:</strong> <span id="receipt-phone"></span></p>
           </div>
-          <p class="receipt-footer-note">Thank you for shopping with Farm Fresh! 🌿<br>Expected delivery: within 24 hours.</p>
+          <div class="receipt-shipping-status">
+            <strong>Shipping Status:</strong> <span id="receipt-status-badge"></span>
+          </div>
+          <div class="receipt-footer-note">
+            <hr class="receipt-divider">
+            <p>Thank you for shopping with Farm Fresh! 🌿</p>
+            <p>Expected delivery: within 24 hours.</p>
+            <p>hello@farmfresh.co.ke | +254 712 345 678</p>
+            <hr class="receipt-divider">
+          </div>
         </div>
 
         <!-- Print Receipt Button -->
@@ -183,6 +195,18 @@
       </section>
     </main>
 
+    <section id="track-order" class="track-order-section">
+      <h2>🚚 Track Your Order</h2>
+      <div class="track-form">
+        <div>
+          <label for="track-order-id">Enter your Order ID</label>
+          <input type="text" id="track-order-id" placeholder="e.g. ord-1712345678000" autocomplete="off">
+        </div>
+        <button type="button" id="btn-track-order" class="btn-submit">Track Order</button>
+      </div>
+      <div id="track-result" class="track-result" hidden></div>
+    </section>
+
     <section id="farmers" class="farmers-section">
       <h2>Meet Our Farmers</h2>
       <div class="farmers-grid"><!-- Farmers injected by script.js from localStorage (ff_farmers) --></div>
@@ -210,6 +234,7 @@
               <li><a href="#farmers">Farmers</a></li>
               <li><a href="#reviews">Reviews</a></li>
               <li><a href="#contact">Contact</a></li>
+              <li><a href="farmer-dashboard.html">Farmer Portal</a></li>
             </ul>
           </nav>
         </div>

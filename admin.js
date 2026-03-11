@@ -43,7 +43,8 @@ function seedData() {
     setStore('ff_orders', [
       { id: 'ord-001', customer: 'Grace Njeri', phone: '0712345678', address: '14 Moi Avenue, Nairobi', items: [{ name: 'Tomatoes', quantity: 2, price: 100 }], total: 200, status: 'Delivered', date: '2026-03-01' },
       { id: 'ord-002', customer: 'Brian Omondi', phone: '0723456789', address: 'Westlands, Nairobi', items: [{ name: 'Spinach', quantity: 3, price: 30 }], total: 90, status: 'Confirmed', date: '2026-03-08' },
-      { id: 'ord-003', customer: 'Faith Wambua', phone: '0734567890', address: 'Karen, Nairobi', items: [{ name: 'Zucchini', quantity: 1, price: 110 }], total: 110, status: 'Pending', date: '2026-03-10' }
+      { id: 'ord-003', customer: 'Faith Wambua', phone: '0734567890', address: 'Karen, Nairobi', items: [{ name: 'Zucchini', quantity: 1, price: 110 }], total: 110, status: 'Pending', date: '2026-03-10' },
+      { id: 'ord-004', customer: 'Mary Akinyi', phone: '0745678901', address: 'Kilimani, Nairobi', items: [{ name: 'Tomatoes', quantity: 3, price: 100 }], total: 300, status: 'Dispatched', date: '2026-03-09' }
     ]);
   }
   if (!localStorage.getItem('ff_reviews')) {
@@ -66,7 +67,7 @@ function handleLogout() {
 
 /* ===== Tab Switching ===== */
 function switchTab(tabId) {
-  var tabTitles = { overview: 'Overview', orders: 'Orders', products: 'Products', farmers: 'Farmers', reviews: 'Reviews' };
+  var tabTitles = { overview: 'Overview', orders: 'Orders', products: 'Products', farmers: 'Farmers', reviews: 'Reviews', shipping: 'Shipping' };
   var titleEl = document.getElementById('topbar-section-title');
   if (titleEl) titleEl.textContent = tabTitles[tabId] || tabId;
 
@@ -82,6 +83,7 @@ function switchTab(tabId) {
   else if (tabId === 'products') renderProducts();
   else if (tabId === 'farmers') renderFarmers();
   else if (tabId === 'reviews') renderReviews();
+  else if (tabId === 'shipping') renderShipping();
 }
 
 /* ===== Overview Tab ===== */
@@ -117,6 +119,7 @@ function renderOverview() {
 function statusBadge(status) {
   var cls = 'badge-pending';
   if (status === 'Confirmed') cls = 'badge-confirmed';
+  else if (status === 'Dispatched') cls = 'badge-dispatched';
   else if (status === 'Delivered') cls = 'badge-delivered';
   return '<span class="badge ' + cls + '">' + escapeHtml(status) + '</span>';
 }
@@ -146,7 +149,7 @@ function renderOrders() {
 }
 
 function orderStatusSelect(id, current) {
-  var opts = ['Pending', 'Confirmed', 'Delivered'];
+  var opts = ['Pending', 'Confirmed', 'Dispatched', 'Delivered'];
   var safeId = escapeHtml(JSON.stringify(id));
   return '<select class="status-select" onchange="updateOrderStatus(' + safeId + ', this.value)">' +
     opts.map(function (s) {
@@ -414,6 +417,127 @@ function deleteReview(id) {
   renderReviews();
 }
 
+/* ===== Shipping Tab ===== */
+function buildShippingSteps(currentStatus) {
+  var steps = ['Pending', 'Confirmed', 'Dispatched', 'Delivered'];
+  var currentIdx = steps.indexOf(currentStatus);
+  var html = '<div class="shipping-steps">';
+  steps.forEach(function (step, i) {
+    var done = i <= currentIdx;
+    html += '<div class="shipping-step">' +
+      '<div class="step-circle' + (done ? ' done' : '') + '">' + (i + 1) + '</div>' +
+      '<div class="step-label' + (done ? ' done' : '') + '">' + escapeHtml(step) + '</div>' +
+      '</div>';
+    if (i < steps.length - 1) {
+      html += '<div class="step-connector' + (done && currentIdx > i ? ' done' : '') + '"></div>';
+    }
+  });
+  html += '</div>';
+  return html;
+}
+
+function buildShippingCard(order) {
+  return '<div class="shipping-card">' +
+    '<h4>' + escapeHtml(order.id) + '</h4>' +
+    '<p class="shipping-customer">👤 ' + escapeHtml(order.customer) + '</p>' +
+    buildShippingSteps(order.status) +
+    '<p style="font-size:0.82rem;color:#555;margin:4px 0 2px;">📍 ' + escapeHtml(order.address) + '</p>' +
+    '<p style="font-size:0.82rem;color:#555;margin:2px 0 2px;">📞 ' + escapeHtml(order.phone) + '</p>' +
+    '<p style="font-size:0.82rem;color:#555;margin:2px 0 2px;">📅 ' + escapeHtml(order.date) + '</p>' +
+    '<p style="font-size:0.82rem;font-weight:700;color:#333;margin:2px 0 0;">Total: KES ' + escapeHtml(String(order.total)) + '</p>' +
+    '</div>';
+}
+
+function renderShipping() {
+  var orders = getStore('ff_orders');
+  var products = getStore('ff_products');
+  var statusFilter = document.getElementById('shipping-status-filter');
+  var farmerFilter = document.getElementById('shipping-farmer-filter');
+
+  // Build farmer list from products
+  var farmerNames = [];
+  products.forEach(function (p) {
+    if (p.farmer && farmerNames.indexOf(p.farmer) === -1) farmerNames.push(p.farmer);
+  });
+
+  // Populate farmer filter (preserve selection)
+  if (farmerFilter) {
+    var currentFarmerVal = farmerFilter.value;
+    farmerFilter.innerHTML = '<option value="all">All Farmers</option>' +
+      farmerNames.map(function (n) {
+        return '<option value="' + escapeHtml(n) + '"' + (n === currentFarmerVal ? ' selected' : '') + '>' + escapeHtml(n) + '</option>';
+      }).join('');
+  }
+
+  var selectedStatus = statusFilter ? statusFilter.value : 'all';
+  var selectedFarmer = farmerFilter ? farmerFilter.value : 'all';
+
+  // Filter orders
+  var filtered = orders.filter(function (o) {
+    var matchesStatus = selectedStatus === 'all' || o.status === selectedStatus;
+    var matchesFarmer = selectedFarmer === 'all' || o.items.some(function (item) {
+      var prod = products.find(function (p) { return p.name === item.name; });
+      return prod && prod.farmer === selectedFarmer;
+    });
+    return matchesStatus && matchesFarmer;
+  });
+
+  // Render cards
+  var cardsContainer = document.getElementById('shipping-cards-container');
+  if (cardsContainer) {
+    if (filtered.length === 0) {
+      cardsContainer.innerHTML = '<p style="color:#777;font-style:italic;">No orders match the selected filters.</p>';
+    } else {
+      cardsContainer.innerHTML = filtered.map(buildShippingCard).join('');
+    }
+  }
+
+  // Render report table
+  var tbody = document.getElementById('shipping-report-tbody');
+  if (tbody) {
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No orders found.</td></tr>';
+    } else {
+      tbody.innerHTML = filtered.map(function (o) {
+        var itemsStr = o.items.map(function (i) { return escapeHtml(i.name) + ' x' + escapeHtml(String(i.quantity)); }).join(', ');
+        var orderFarmerNames = o.items.map(function (item) {
+          var prod = products.find(function (p) { return p.name === item.name; });
+          return prod ? prod.farmer : '—';
+        }).filter(function (v, i, a) { return a.indexOf(v) === i; }).join(', ');
+        var safeId = escapeHtml(JSON.stringify(o.id));
+        var opts = ['Pending', 'Confirmed', 'Dispatched', 'Delivered'];
+        var selectHtml = '<select class="status-select" onchange="updateShippingStatus(' + safeId + ', this.value)">' +
+          opts.map(function (s) {
+            return '<option value="' + escapeHtml(s) + '"' + (s === o.status ? ' selected' : '') + '>' + escapeHtml(s) + '</option>';
+          }).join('') + '</select>';
+        return '<tr>' +
+          '<td>' + escapeHtml(o.id) + '</td>' +
+          '<td>' + escapeHtml(o.customer) + '</td>' +
+          '<td>' + escapeHtml(orderFarmerNames) + '</td>' +
+          '<td>' + itemsStr + '</td>' +
+          '<td>KES ' + escapeHtml(String(o.total)) + '</td>' +
+          '<td>' + statusBadge(o.status) + '</td>' +
+          '<td>' + escapeHtml(o.date) + '</td>' +
+          '<td>' + selectHtml + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+  }
+}
+
+function updateShippingStatus(id, newStatus) {
+  var orders = getStore('ff_orders');
+  var order = orders.find(function (o) { return o.id === id; });
+  if (order) {
+    order.status = newStatus;
+    setStore('ff_orders', orders);
+    renderShipping();
+    if (document.getElementById('tab-overview').classList.contains('active')) {
+      renderOverview();
+    }
+  }
+}
+
 /* ===== Init ===== */
 document.addEventListener('DOMContentLoaded', function () {
   // Auth guard — redirect to login if not authenticated
@@ -456,4 +580,10 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('farmer-modal').addEventListener('click', function (e) {
     if (e.target === this) closeFarmerModal();
   });
+
+  /* Shipping filters */
+  var shippingStatusFilter = document.getElementById('shipping-status-filter');
+  var shippingFarmerFilter = document.getElementById('shipping-farmer-filter');
+  if (shippingStatusFilter) shippingStatusFilter.addEventListener('change', renderShipping);
+  if (shippingFarmerFilter) shippingFarmerFilter.addEventListener('change', renderShipping);
 });
