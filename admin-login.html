@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Farm Fresh Admin — sign in to your dashboard.">
+    <title>Farm Fresh — Admin Login</title>
+    <link rel="stylesheet" href="admin-login.css">
+  </head>
+  <body>
+    <div class="login-card">
+      <div class="login-logo">🌿 Farm Fresh</div>
+      <p class="login-subtitle">Sign in to your admin dashboard</p>
+      <form id="login-form" class="login-form" novalidate>
+        <div class="form-group">
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" placeholder="Enter username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="Enter password" required autocomplete="current-password">
+        </div>
+        <p class="login-error" id="login-error" aria-live="polite"></p>
+        <button type="submit" class="btn-signin">Sign in</button>
+      </form>
+    </div>
+
+    <script>
+      var ADMIN_USERNAME = 'admin';
+      var ADMIN_PASSWORD = 'farmfresh2026'; // TODO: replace with server-side auth
+
+      function isLoggedIn() {
+        return localStorage.getItem('adminLoggedIn') === 'true';
+      }
+
+      // If already authenticated, skip login page
+      if (isLoggedIn()) {
+        window.location.replace('admin.html');
+      }
+
+      document.getElementById('login-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var username = document.getElementById('login-username').value.trim();
+        var password = document.getElementById('login-password').value;
+        var errorEl = document.getElementById('login-error');
+
+        if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+          errorEl.textContent = '';
+          localStorage.setItem('adminLoggedIn', 'true');
+          window.location.replace('admin.html');
+        } else {
+          errorEl.textContent = 'Incorrect username or password.';
+        }
+      });
+    </script>
+  </body>
+</html>
