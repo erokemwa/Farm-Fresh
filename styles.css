@@ -136,6 +136,10 @@ header {
   padding: 0 4px;
 }
 
+.cart-badge:empty {
+  display: none;
+}
+
 .header-bottom {
   background: var(--green-dark);
   display: flex;

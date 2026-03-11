@@ -51,11 +51,11 @@ function updateCartDisplay() {
     cartList.appendChild(emptyMsg);
     checkoutButton.style.display = 'none';
     cartTotal.textContent = '0.00';
-    if (cartCountBadge) cartCountBadge.textContent = '0';
+    if (cartCountBadge) cartCountBadge.textContent = '';
     const cartHeaderCount = document.getElementById('cart-header-count');
     if (cartHeaderCount) cartHeaderCount.textContent = '0';
     const fabCount = document.getElementById('fab-cart-count');
-    if (fabCount) fabCount.textContent = '0';
+    if (fabCount) fabCount.textContent = '';
     return;
   }
 
@@ -98,6 +98,7 @@ function updateCartDisplay() {
 
 // Add event listener to the checkout button — show payment form
 checkoutButton.addEventListener('click', () => {
+  if (cartItems.length === 0) return;
   if (checkoutFormWrapper) {
     checkoutFormWrapper.hidden = false;
   }
@@ -143,16 +144,16 @@ const searchInput = document.getElementById('product-search');
 if (searchInput) {
   searchInput.addEventListener('input', () => {
     const query = searchInput.value.toLowerCase().trim();
+    const activeFilter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
     const productItems = document.querySelectorAll('.product-list ul li');
     productItems.forEach(li => {
       const name = (li.dataset.name || '').toLowerCase();
       const farmer = (li.dataset.farmer || '').toLowerCase();
       const availability = (li.dataset.availability || '').toLowerCase();
-      if (!query || name.includes(query) || farmer.includes(query) || availability.includes(query)) {
-        li.style.display = '';
-      } else {
-        li.style.display = 'none';
-      }
+      const cat = (li.dataset.category || '');
+      const matchesFilter = activeFilter === 'all' || cat === activeFilter;
+      const matchesSearch = !query || name.includes(query) || farmer.includes(query) || availability.includes(query);
+      li.style.display = (matchesFilter && matchesSearch) ? '' : 'none';
     });
   });
 }
@@ -263,5 +264,9 @@ document.querySelectorAll('.product-list ul li').forEach(li => {
   plusBtn.addEventListener('click', () => {
     const current = parseInt(input.value, 10) || 1;
     input.value = current + 1;
+  });
+  input.addEventListener('blur', () => {
+    const val = parseInt(input.value, 10);
+    if (!val || val < 1) input.value = 1;
   });
 });
