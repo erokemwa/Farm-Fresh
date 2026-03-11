@@ -1532,6 +1532,20 @@ footer {
     display: none !important;
   }
 
+  /* Reset body and main for clean print layout */
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  main {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
   /* Show only the receipt block */
   .cart {
     box-shadow: none !important;
@@ -1539,17 +1553,19 @@ footer {
     position: static !important;
     width: 100% !important;
     min-width: unset !important;
+    padding: 0 !important;
+    background: #fff !important;
   }
 
   #receipt-block {
     display: block !important;
     margin: 0 !important;
-    border: none !important;
-    padding: 0 !important;
+    border: 1.5px solid #198C19 !important;
+    padding: 16px 20px !important;
+    page-break-inside: avoid;
   }
 
-  body {
-    background: #fff !important;
-    color: #000 !important;
-  }
+  /* Ensure receipt text is legible for printing */
+  .receipt-logo { color: #198C19 !important; }
+  .receipt-footer-note { color: #333 !important; }
 }
