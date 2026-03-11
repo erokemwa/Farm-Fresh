@@ -337,7 +337,8 @@ function saveProduct(e) {
   // Resolve farmer display name from farmerId
   var farmers = getStore('ff_farmers');
   var farmerObj = farmers.find(function (f) { return f.id === farmerId; });
-  var farmerName = farmerObj ? farmerObj.name + "'s Farm" : (farmerId || '');
+  var firstName = farmerObj ? farmerObj.name.split(' ')[0] : '';
+  var farmerName = farmerObj ? firstName + "'s Farm" : (farmerId || '');
 
   var products = getStore('ff_products');
   if (!name || !farmerId || !price || !unit) {
@@ -700,7 +701,7 @@ function renderCustomers() {
     var userOrders = orders.filter(function (o) { return o.customerId === u.id; });
     var totalSpend = userOrders.reduce(function (sum, o) { return sum + (o.total || 0); }, 0);
     var lastOrderDate = userOrders.length > 0
-      ? userOrders.slice().sort(function (a, b) { return b.date > a.date ? 1 : -1; })[userOrders.length - 1].date
+      ? userOrders.slice().sort(function (a, b) { return b.date > a.date ? -1 : 1; })[0].date
       : '—';
     return '<tr>' +
       '<td>' + escapeHtml(u.name) + '</td>' +

@@ -65,7 +65,7 @@ function getFarmer() {
 
 function getMyProducts(farmerId) {
   var products = getStore('ff_products');
-  return products.filter(function (p) { return p.farmerId === farmerId || p.farmer === farmerId; });
+  return products.filter(function (p) { return p.farmerId === farmerId; });
 }
 
 function getMyOrders(farmerId) {

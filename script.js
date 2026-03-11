@@ -728,7 +728,7 @@ if (btnTrackOrder) {
     order.items.forEach(function (item) {
       var key = item.farmerId || 'unknown';
       if (!farmerGroups[key]) {
-        farmerGroups[key] = { farmerName: item.farmerName || item.name, itemStatus: item.itemStatus || order.status, items: [] };
+        farmerGroups[key] = { farmerName: item.farmerName || 'Unknown Farmer', itemStatus: item.itemStatus || order.status, items: [] };
       }
       farmerGroups[key].items.push(item);
     });
