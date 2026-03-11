@@ -32,31 +32,91 @@ function setStore(key, data) {
 
 // ===== Seed Default Data (mirrors admin.js seedData) =====
 function seedAdminData() {
+  // Migrate legacy orders that lack productId/farmerId on items
+  (function migrateLegacyOrders() {
+    var orders = JSON.parse(localStorage.getItem('ff_orders') || '[]');
+    var products = JSON.parse(localStorage.getItem('ff_products') || '[]');
+    var changed = false;
+    orders.forEach(function(order) {
+      order.items.forEach(function(item) {
+        if (!item.productId) {
+          var match = products.find(function(p) { return p.name === item.name; });
+          if (match) {
+            item.productId  = match.id;
+            item.farmerId   = match.farmerId || '';
+            item.farmerName = match.farmer || '';
+            item.subtotal   = item.price * item.quantity;
+            item.itemStatus = item.itemStatus || order.status;
+            changed = true;
+          }
+        }
+      });
+      if (!order.customerId) {
+        order.customerId = 'cust-legacy';
+        changed = true;
+      }
+    });
+    if (changed) localStorage.setItem('ff_orders', JSON.stringify(orders));
+  })();
+
   if (!localStorage.getItem('ff_products')) {
     setStore('ff_products', [
-      { id: 'p1', name: 'Tomatoes', farmer: "John's Farm", price: 100, originalPrice: 120, category: 'vegetables', unit: 'per kg', available: true },
-      { id: 'p2', name: 'Spinach', farmer: "Amina's Farm", price: 30, originalPrice: null, category: 'greens', unit: 'per bunch', available: true },
-      { id: 'p3', name: 'Zucchini', farmer: "Amina's Farm", price: 110, originalPrice: 140, category: 'vegetables', unit: 'per kg', available: true }
+      { id: 'p1', name: 'Tomatoes', farmerId: 'f1', farmer: "John's Farm", price: 100, originalPrice: 120, category: 'vegetables', unit: 'per kg', available: true },
+      { id: 'p2', name: 'Spinach', farmerId: 'f2', farmer: "Amina's Farm", price: 30, originalPrice: null, category: 'greens', unit: 'per bunch', available: true },
+      { id: 'p3', name: 'Zucchini', farmerId: 'f2', farmer: "Amina's Farm", price: 110, originalPrice: 140, category: 'vegetables', unit: 'per kg', available: true }
     ]);
   }
   if (!localStorage.getItem('ff_farmers')) {
     setStore('ff_farmers', [
-      { id: 'f1', name: 'John Kamau', location: 'Nakuru, Kenya', bio: 'John has been farming organically for over 15 years, specialising in tomatoes and leafy greens grown without pesticides.' },
-      { id: 'f2', name: 'Amina Wanjiru', location: 'Kiambu, Kenya', bio: 'Amina runs a family farm famous for its award-winning spinach and zucchini, using traditional irrigation methods.' }
+      { id: 'f1', name: 'John Kamau', location: 'Nakuru, Kenya', bio: 'John has been farming organically for over 15 years, specialising in tomatoes and leafy greens grown without pesticides.', phone: '0711111111', email: 'john@farmfresh.co.ke' },
+      { id: 'f2', name: 'Amina Wanjiru', location: 'Kiambu, Kenya', bio: 'Amina runs a family farm famous for its award-winning spinach and zucchini, using traditional irrigation methods.', phone: '0722222222', email: 'amina@farmfresh.co.ke' }
+    ]);
+  }
+  if (!localStorage.getItem('ff_users')) {
+    setStore('ff_users', [
+      { id: 'cust-001', name: 'Grace Njeri',   phone: '0712345678', address: '14 Moi Avenue, Nairobi',   ordersCount: 1 },
+      { id: 'cust-002', name: 'Brian Omondi',  phone: '0723456789', address: 'Westlands, Nairobi',        ordersCount: 1 },
+      { id: 'cust-003', name: 'Peter Mwangi',  phone: '0756789012', address: 'Thika Road, Nairobi',       ordersCount: 1 },
+      { id: 'cust-004', name: 'Faith Wambua',  phone: '0734567890', address: 'Karen, Nairobi',            ordersCount: 1 },
+      { id: 'cust-005', name: 'Mary Akinyi',   phone: '0745678901', address: 'Kilimani, Nairobi',         ordersCount: 1 }
     ]);
   }
   if (!localStorage.getItem('ff_orders')) {
     setStore('ff_orders', [
-      { id: 'ord-001', customer: 'Grace Njeri', phone: '0712345678', address: '14 Moi Avenue, Nairobi', items: [{ name: 'Tomatoes', quantity: 2, price: 100 }], total: 200, status: 'Delivered', date: '2026-03-01' },
-      { id: 'ord-002', customer: 'Brian Omondi', phone: '0723456789', address: 'Westlands, Nairobi', items: [{ name: 'Spinach', quantity: 3, price: 30 }], total: 90, status: 'Confirmed', date: '2026-03-08' },
-      { id: 'ord-003', customer: 'Faith Wambua', phone: '0734567890', address: 'Karen, Nairobi', items: [{ name: 'Zucchini', quantity: 1, price: 110 }], total: 110, status: 'Pending', date: '2026-03-10' },
-      { id: 'ord-004', customer: 'Mary Akinyi', phone: '0745678901', address: 'Kilimani, Nairobi', items: [{ name: 'Tomatoes', quantity: 3, price: 100 }], total: 300, status: 'Dispatched', date: '2026-03-09' }
+      {
+        id: 'ord-001', customerId: 'cust-001', customer: 'Grace Njeri', phone: '0712345678', address: '14 Moi Avenue, Nairobi',
+        items: [{ productId: 'p1', farmerId: 'f1', name: 'Tomatoes', farmerName: "John's Farm", quantity: 2, price: 100, subtotal: 200, itemStatus: 'Delivered' }],
+        total: 200, status: 'Delivered', date: '2026-03-01'
+      },
+      {
+        id: 'ord-002', customerId: 'cust-002', customer: 'Brian Omondi', phone: '0723456789', address: 'Westlands, Nairobi',
+        items: [{ productId: 'p2', farmerId: 'f2', name: 'Spinach', farmerName: "Amina's Farm", quantity: 3, price: 30, subtotal: 90, itemStatus: 'Confirmed' }],
+        total: 90, status: 'Confirmed', date: '2026-03-08'
+      },
+      {
+        id: 'ord-003', customerId: 'cust-004', customer: 'Faith Wambua', phone: '0734567890', address: 'Karen, Nairobi',
+        items: [{ productId: 'p3', farmerId: 'f2', name: 'Zucchini', farmerName: "Amina's Farm", quantity: 1, price: 110, subtotal: 110, itemStatus: 'Pending' }],
+        total: 110, status: 'Pending', date: '2026-03-10'
+      },
+      {
+        id: 'ord-004', customerId: 'cust-005', customer: 'Mary Akinyi', phone: '0745678901', address: 'Kilimani, Nairobi',
+        items: [{ productId: 'p1', farmerId: 'f1', name: 'Tomatoes', farmerName: "John's Farm", quantity: 3, price: 100, subtotal: 300, itemStatus: 'Dispatched' }],
+        total: 300, status: 'Dispatched', date: '2026-03-09'
+      },
+      {
+        id: 'ord-005', customerId: 'cust-003', customer: 'Peter Mwangi', phone: '0756789012', address: 'Thika Road, Nairobi',
+        items: [
+          { productId: 'p1', farmerId: 'f1', name: 'Tomatoes', farmerName: "John's Farm", quantity: 2, price: 100, subtotal: 200, itemStatus: 'Dispatched' },
+          { productId: 'p2', farmerId: 'f2', name: 'Spinach',  farmerName: "Amina's Farm", quantity: 3, price: 30,  subtotal: 90,  itemStatus: 'Pending' }
+        ],
+        total: 290, status: 'Pending', date: '2026-03-11'
+      }
     ]);
   }
   if (!localStorage.getItem('ff_reviews')) {
     setStore('ff_reviews', [
-      { id: 'rev-001', name: 'Grace Njeri', rating: 5, comment: 'The tomatoes were incredibly fresh and arrived quickly. Will definitely order again!', status: 'Approved' },
-      { id: 'rev-002', name: 'Brian Omondi', rating: 4, comment: 'Great spinach, very fresh. Delivery was a bit late but overall happy.', status: 'Pending' }
+      { id: 'rev-001', customerId: 'cust-001', name: 'Grace Njeri', productId: 'p1', farmerId: 'f1', rating: 5, comment: 'The tomatoes were incredibly fresh and arrived quickly. Will definitely order again!', status: 'Approved', date: '2026-03-01' },
+      { id: 'rev-002', customerId: 'cust-002', name: 'Brian Omondi', productId: 'p2', farmerId: 'f2', rating: 4, comment: 'Great spinach, very fresh. Delivery was a bit late but overall happy.', status: 'Pending', date: '2026-03-08' }
     ]);
   }
 }
@@ -103,6 +163,9 @@ function renderProducts() {
         ' data-name="' + escapeHtml(p.name) + '"' +
         ' data-price="' + escapeHtml(String(p.price)) + '"' +
         ' data-farmer="' + escapeHtml(p.farmer) + '"' +
+        ' data-product-id="' + escapeHtml(p.id) + '"' +
+        ' data-farmer-id="' + escapeHtml(p.farmerId || '') + '"' +
+        ' data-farmer-name="' + escapeHtml(p.farmer) + '"' +
         ' data-availability="' + (isAvailable ? 'available' : 'out-of-stock') + '"' +
         (!isAvailable ? ' disabled aria-disabled="true"' : '') +
       '>🛒 Add to Cart</button>';
@@ -223,6 +286,9 @@ function attachAddToCartListeners() {
     button.addEventListener('click', function () {
       var name = button.dataset.name;
       var price = parseFloat(button.dataset.price);
+      var productId = button.dataset.productId || '';
+      var farmerId = button.dataset.farmerId || '';
+      var farmerName = button.dataset.farmerName || '';
       var productLi = button.closest('li');
       var qtyInput = productLi ? productLi.querySelector('.qty-input') : null;
       var quantity = qtyInput ? Math.max(1, parseInt(qtyInput.value, 10) || 1) : 1;
@@ -231,7 +297,7 @@ function attachAddToCartListeners() {
       if (existing) {
         existing.quantity += quantity;
       } else {
-        cartItems.push({ name: name, price: price, quantity: quantity });
+        cartItems.push({ productId: productId, farmerId: farmerId, farmerName: farmerName, name: name, price: price, quantity: quantity });
       }
 
       updateCartDisplay();
@@ -361,15 +427,41 @@ if (checkoutForm) {
     var address = addressInput.value.trim();
     var totalValue = cartItems.reduce(function (a, i) { return a + i.price * i.quantity; }, 0);
 
+    // Look up or create customer in ff_users
+    var users = getStore('ff_users');
+    var existingUser = users.find(function (u) { return u.phone === phone; });
+    var customerId;
+    if (existingUser) {
+      existingUser.ordersCount = (existingUser.ordersCount || 0) + 1;
+      customerId = existingUser.id;
+      setStore('ff_users', users);
+    } else {
+      customerId = 'cust-' + Date.now();
+      users.push({ id: customerId, name: name, phone: phone, address: address, ordersCount: 1 });
+      setStore('ff_users', users);
+    }
+
     // Persist order to ff_orders
     var orders = getStore('ff_orders');
     var newOrderId = 'ord-' + Date.now();
     orders.push({
       id: newOrderId,
+      customerId: customerId,
       customer: name,
       phone: phone,
       address: address,
-      items: cartItems.map(function (i) { return { name: i.name, quantity: i.quantity, price: i.price }; }),
+      items: cartItems.map(function (i) {
+        return {
+          productId:  i.productId || '',
+          farmerId:   i.farmerId || '',
+          farmerName: i.farmerName || '',
+          name:       i.name,
+          quantity:   i.quantity,
+          price:      i.price,
+          subtotal:   i.price * i.quantity,
+          itemStatus: 'Pending'
+        };
+      }),
       total: totalValue,
       status: 'Pending',
       date: new Date().toISOString().slice(0, 10)
@@ -401,14 +493,32 @@ if (checkoutForm) {
       if (receiptCustomer) receiptCustomer.textContent = 'Customer: ' + name;
 
       if (receiptItems) {
-        receiptItems.innerHTML = cartItems.map(function (i) {
-          return '<tr>' +
-            '<td>' + escapeHtml(i.name) + '</td>' +
-            '<td class="receipt-qty">' + i.quantity + '</td>' +
-            '<td class="receipt-price">' + formatKES(i.price) + '</td>' +
-            '<td class="receipt-price">' + formatKES(i.price * i.quantity) + '</td>' +
-            '</tr>';
-        }).join('');
+        // Group cart items by farmer
+        var farmerGroups = [];
+        cartItems.forEach(function (i) {
+          var farmerKey = i.farmerId || 'unknown';
+          var group = farmerGroups.find(function (g) { return g.farmerId === farmerKey; });
+          if (!group) {
+            group = { farmerId: farmerKey, farmerName: i.farmerName || 'Unknown Farmer', items: [] };
+            farmerGroups.push(group);
+          }
+          group.items.push(i);
+        });
+
+        var rowsHtml = '';
+        farmerGroups.forEach(function (group) {
+          rowsHtml += '<tr class="receipt-farmer-group-header"><td colspan="4">👨‍🌾 ' + escapeHtml(group.farmerName) + '</td></tr>';
+          group.items.forEach(function (i) {
+            rowsHtml +=
+              '<tr>' +
+              '<td>' + escapeHtml(i.name) + ' <small class="receipt-farmer">by ' + escapeHtml(i.farmerName || '') + '</small></td>' +
+              '<td class="receipt-qty">' + i.quantity + '</td>' +
+              '<td class="receipt-price">' + formatKES(i.price) + '</td>' +
+              '<td class="receipt-price">' + formatKES(i.price * i.quantity) + '</td>' +
+              '</tr>';
+          });
+        });
+        receiptItems.innerHTML = rowsHtml;
       }
 
       if (receiptGrandTotal) receiptGrandTotal.textContent = formatKES(totalValue);
@@ -467,6 +577,7 @@ if (reviewForm) {
     var nameInput = document.getElementById('review-name');
     var ratingInput = reviewForm.querySelector('input[name="rating"]:checked');
     var commentInput = document.getElementById('review-comment');
+    var productSelect = document.getElementById('review-product');
 
     var reviewerName = nameInput ? nameInput.value.trim() : '';
     var rating = ratingInput ? parseInt(ratingInput.value, 10) : 0;
@@ -485,11 +596,22 @@ if (reviewForm) {
       submitBtn.textContent = 'Submitting…';
     }
 
+    // Resolve productId / farmerId from selected product
+    var selectedProductId = productSelect ? productSelect.value : '';
+    var selectedFarmerId = '';
+    if (selectedProductId) {
+      var allProducts = getStore('ff_products');
+      var selectedProduct = allProducts.find(function (p) { return p.id === selectedProductId; });
+      if (selectedProduct) selectedFarmerId = selectedProduct.farmerId || '';
+    }
+
     // Persist review to ff_reviews
     var reviews = getStore('ff_reviews');
     reviews.unshift({
       id: 'rev-' + Date.now(),
       name: reviewerName,
+      productId: selectedProductId,
+      farmerId: selectedFarmerId,
       rating: rating,
       comment: comment,
       status: 'Pending',
@@ -601,8 +723,32 @@ if (btnTrackOrder) {
     else if (order.status === 'Dispatched') statusCls = 'receipt-badge-dispatched';
     else if (order.status === 'Delivered') statusCls = 'receipt-badge-delivered';
 
-    var itemsHtml = order.items.map(function (i) {
-      return '<li>' + escapeHtml(i.name) + ' &times; ' + escapeHtml(String(i.quantity)) + '</li>';
+    // Group items by farmer
+    var farmerGroups = {};
+    order.items.forEach(function (item) {
+      var key = item.farmerId || 'unknown';
+      if (!farmerGroups[key]) {
+        farmerGroups[key] = { farmerName: item.farmerName || item.name, itemStatus: item.itemStatus || order.status, items: [] };
+      }
+      farmerGroups[key].items.push(item);
+    });
+
+    var farmerGroupsHtml = Object.keys(farmerGroups).map(function (key) {
+      var group = farmerGroups[key];
+      var iStatus = group.itemStatus;
+      var iCls = 'receipt-badge-pending';
+      if (iStatus === 'Confirmed') iCls = 'receipt-badge-confirmed';
+      else if (iStatus === 'Dispatched') iCls = 'receipt-badge-dispatched';
+      else if (iStatus === 'Delivered') iCls = 'receipt-badge-delivered';
+      var itemsListHtml = group.items.map(function (i) {
+        return '<li>' + escapeHtml(i.name) + ' \xD7 ' + escapeHtml(String(i.quantity)) +
+          ' \u2014 ' + formatKES(i.subtotal || i.price * i.quantity) + '</li>';
+      }).join('');
+      return '<div class="track-farmer-group">' +
+        '<h4>👨‍🌾 ' + escapeHtml(group.farmerName) +
+        ' <span class="receipt-status-badge ' + iCls + '">' + escapeHtml(iStatus) + '</span></h4>' +
+        '<ul>' + itemsListHtml + '</ul>' +
+        '</div>';
     }).join('');
 
     resultEl.innerHTML =
@@ -612,9 +758,10 @@ if (btnTrackOrder) {
         '<p><strong>Customer:</strong> ' + escapeHtml(order.customer) + '</p>' +
         stepsHtml +
         '<p>📍 <strong>Delivery Address:</strong> ' + escapeHtml(order.address) + '</p>' +
-        '<p><strong>Items ordered:</strong></p><ul style="margin:4px 0 8px;padding-left:20px;font-size:0.9rem;">' + itemsHtml + '</ul>' +
+        '<p><strong>Items by Farmer:</strong></p>' +
+        farmerGroupsHtml +
         '<p><strong>Total:</strong> ' + formatKES(order.total) + '</p>' +
-        '<p><strong>Status:</strong> <span class="receipt-status-badge ' + statusCls + '">' + escapeHtml(order.status) + '</span></p>' +
+        '<p><strong>Overall Status:</strong> <span class="receipt-status-badge ' + statusCls + '">' + escapeHtml(order.status) + '</span></p>' +
       '</div>';
     resultEl.hidden = false;
   });
@@ -635,6 +782,17 @@ renderFarmers();
 renderReviews();
 attachAddToCartListeners();
 attachQtySteppers();
+
+// Populate review product dropdown
+(function populateReviewProductDropdown() {
+  var select = document.getElementById('review-product');
+  if (!select) return;
+  var products = getStore('ff_products');
+  select.innerHTML = '<option value="">— Select a product (optional) —</option>' +
+    products.map(function (p) {
+      return '<option value="' + escapeHtml(p.id) + '">' + escapeHtml(p.name) + ' (' + escapeHtml(p.farmer) + ')</option>';
+    }).join('');
+})();
 
 // ===== Print Receipt Button =====
 var btnPrintReceiptEl = document.getElementById('btn-print-receipt');

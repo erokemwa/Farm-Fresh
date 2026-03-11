@@ -37,6 +37,9 @@
           <a class="nav-link" href="javascript:void(0)" data-tab="shipping" role="button" tabindex="0">
             <span class="nav-icon">🚚</span> Shipping
           </a>
+          <a class="nav-link" href="javascript:void(0)" data-tab="customers" role="button" tabindex="0">
+            <span class="nav-icon">👥</span> Customers
+          </a>
         </nav>
       </aside>
 
@@ -164,12 +167,14 @@
                 <tr>
                   <th>Name</th>
                   <th>Location</th>
-                  <th>Bio</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Stats</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="farmers-body">
-                <tr class="empty-row"><td colspan="4">Loading…</td></tr>
+                <tr class="empty-row"><td colspan="6">Loading…</td></tr>
               </tbody>
             </table>
           </div>
@@ -238,6 +243,30 @@
           </div>
         </section>
 
+        <!-- ===== Customers Tab ===== -->
+        <section id="tab-customers" class="admin-section">
+          <div class="section-header">
+            <h2>Customers</h2>
+          </div>
+          <div class="table-wrapper">
+            <table aria-label="Customers">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Address</th>
+                  <th>Orders</th>
+                  <th>Total Spend (KES)</th>
+                  <th>Last Order</th>
+                </tr>
+              </thead>
+              <tbody id="customers-body">
+                <tr class="empty-row"><td colspan="6">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
         </main>
       </div>
     </div>
@@ -256,8 +285,10 @@
               <input type="text" id="p-name" name="p-name" placeholder="e.g. Tomatoes" required>
             </div>
             <div class="form-group">
-              <label for="p-farmer">Farmer</label>
-              <input type="text" id="p-farmer" name="p-farmer" placeholder="e.g. John's Farm" required>
+              <label for="p-farmer-id">Farmer</label>
+              <select id="p-farmer-id" name="p-farmer-id" required>
+                <option value="">— Select Farmer —</option>
+              </select>
             </div>
           </div>
           <div class="form-row">
@@ -311,6 +342,16 @@
           <div class="form-group">
             <label for="f-bio">Bio</label>
             <textarea id="f-bio" name="f-bio" rows="4" placeholder="Short bio about the farmer…" required></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="f-phone">Phone</label>
+              <input type="tel" id="f-phone" name="f-phone" placeholder="e.g. 0711111111">
+            </div>
+            <div class="form-group">
+              <label for="f-email">Email</label>
+              <input type="email" id="f-email" name="f-email" placeholder="e.g. john@farmfresh.co.ke">
+            </div>
           </div>
           <div class="form-actions">
             <button type="submit" class="btn-primary">Save Farmer</button>
