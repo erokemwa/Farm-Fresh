@@ -1229,3 +1229,159 @@ footer {
     justify-content: center;
   }
 }
+
+/* ===== Receipt Block ===== */
+.receipt-block {
+  margin: 12px 20px;
+  border: 1.5px solid var(--green);
+  border-radius: 8px;
+  padding: 16px 20px;
+  background: #fff;
+  font-size: 0.9rem;
+  color: #222;
+}
+
+.receipt-header {
+  text-align: center;
+  margin-bottom: 12px;
+  border-bottom: 2px dashed var(--green);
+  padding-bottom: 10px;
+}
+
+.receipt-logo {
+  margin: 0 0 4px;
+  font-size: 1.3rem;
+  color: var(--green);
+}
+
+.receipt-tagline {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.receipt-meta {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  color: #555;
+}
+
+.receipt-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+  font-size: 0.88rem;
+}
+
+.receipt-table th {
+  text-align: left;
+  border-bottom: 1.5px solid var(--border);
+  padding: 4px 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.receipt-table td {
+  padding: 4px 6px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.receipt-table tfoot td {
+  border-top: 2px solid var(--green);
+  border-bottom: none;
+  padding-top: 6px;
+  font-weight: 700;
+}
+
+.receipt-qty,
+.receipt-price {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.receipt-delivery {
+  border-top: 1px dashed var(--border);
+  padding-top: 8px;
+  margin-bottom: 10px;
+  font-size: 0.88rem;
+}
+
+.receipt-delivery p {
+  margin: 3px 0;
+}
+
+.receipt-footer-note {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 8px 0 0;
+  border-top: 2px dashed var(--green);
+  padding-top: 8px;
+}
+
+/* ===== Print Receipt Button ===== */
+.btn-print-receipt {
+  display: block;
+  width: calc(100% - 40px);
+  margin: 0 20px 12px;
+  padding: 10px;
+  background: #1565c0;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 700;
+  transition: background 0.2s;
+}
+
+.btn-print-receipt:hover {
+  background: #0d47a1;
+}
+
+/* ===== Print Media Query ===== */
+@media print {
+  /* Hide everything except the receipt */
+  body > *:not(.cart-print-wrapper),
+  .announcement-bar,
+  header,
+  .hero,
+  main > .products-wrapper,
+  #farmers,
+  #contact,
+  footer,
+  .fab-cart,
+  #toast,
+  .cart-header,
+  .cart > ul,
+  .cart-total-line,
+  #order-confirmation,
+  .secure-checkout-label,
+  .checkout,
+  #checkout-form-wrapper,
+  .payment-methods,
+  .btn-print-receipt {
+    display: none !important;
+  }
+
+  /* Show only the receipt block */
+  .cart {
+    box-shadow: none !important;
+    border: none !important;
+    position: static !important;
+    width: 100% !important;
+    min-width: unset !important;
+  }
+
+  #receipt-block {
+    display: block !important;
+    margin: 0 !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+}

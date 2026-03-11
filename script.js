@@ -362,8 +362,9 @@ if (checkoutForm) {
 
     // Persist order to ff_orders
     var orders = getStore('ff_orders');
+    var newOrderId = 'ord-' + Date.now();
     orders.push({
-      id: 'ord-' + Date.now(),
+      id: newOrderId,
       customer: name,
       phone: phone,
       address: address,
@@ -382,9 +383,45 @@ if (checkoutForm) {
     if (totalLine) totalLine.style.display = 'none';
     checkoutButton.style.display = 'none';
 
+    // ===== Populate & Show Receipt =====
+    var receiptBlock = document.getElementById('receipt-block');
+    var receiptMeta = document.getElementById('receipt-meta');
+    var receiptItems = document.getElementById('receipt-items');
+    var receiptGrandTotal = document.getElementById('receipt-grand-total');
+    var receiptAddress = document.getElementById('receipt-address');
+    var receiptPhone = document.getElementById('receipt-phone');
+    var btnPrintReceipt = document.getElementById('btn-print-receipt');
+
+    if (receiptBlock) {
+      var orderDate = new Date().toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' });
+      if (receiptMeta) receiptMeta.textContent = 'Order ID: ' + newOrderId + '  |  Date: ' + orderDate;
+
+      if (receiptItems) {
+        receiptItems.innerHTML = cartItems.map(function (i) {
+          return '<tr>' +
+            '<td>' + escapeHtml(i.name) + '</td>' +
+            '<td class="receipt-qty">' + i.quantity + '</td>' +
+            '<td class="receipt-price">' + formatKES(i.price) + '</td>' +
+            '<td class="receipt-price">' + formatKES(i.price * i.quantity) + '</td>' +
+            '</tr>';
+        }).join('');
+      }
+
+      if (receiptGrandTotal) receiptGrandTotal.textContent = formatKES(totalValue);
+      if (receiptAddress) receiptAddress.textContent = address;
+      if (receiptPhone) receiptPhone.textContent = phone;
+
+      receiptBlock.hidden = false;
+      if (btnPrintReceipt) btnPrintReceipt.hidden = false;
+    }
+
     setTimeout(function () {
       cartItems = [];
       if (orderConfirmation) orderConfirmation.hidden = true;
+      var receiptBlockEl = document.getElementById('receipt-block');
+      if (receiptBlockEl) receiptBlockEl.hidden = true;
+      var btnPrint = document.getElementById('btn-print-receipt');
+      if (btnPrint) btnPrint.hidden = true;
       cartList.style.display = '';
       if (totalLine) totalLine.style.display = '';
       checkoutForm.reset();
@@ -512,3 +549,11 @@ renderFarmers();
 renderReviews();
 attachAddToCartListeners();
 attachQtySteppers();
+
+// ===== Print Receipt Button =====
+var btnPrintReceiptEl = document.getElementById('btn-print-receipt');
+if (btnPrintReceiptEl) {
+  btnPrintReceiptEl.addEventListener('click', function () {
+    window.print();
+  });
+}
