@@ -500,7 +500,7 @@ function renderShipping() {
     } else {
       tbody.innerHTML = filtered.map(function (o) {
         var itemsStr = o.items.map(function (i) { return escapeHtml(i.name) + ' x' + escapeHtml(String(i.quantity)); }).join(', ');
-        var farmerNames = o.items.map(function (item) {
+        var orderFarmerNames = o.items.map(function (item) {
           var prod = products.find(function (p) { return p.name === item.name; });
           return prod ? prod.farmer : '—';
         }).filter(function (v, i, a) { return a.indexOf(v) === i; }).join(', ');
@@ -513,7 +513,7 @@ function renderShipping() {
         return '<tr>' +
           '<td>' + escapeHtml(o.id) + '</td>' +
           '<td>' + escapeHtml(o.customer) + '</td>' +
-          '<td>' + escapeHtml(farmerNames) + '</td>' +
+          '<td>' + escapeHtml(orderFarmerNames) + '</td>' +
           '<td>' + itemsStr + '</td>' +
           '<td>KES ' + escapeHtml(String(o.total)) + '</td>' +
           '<td>' + statusBadge(o.status) + '</td>' +

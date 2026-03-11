@@ -241,7 +241,7 @@ function toggleMyProduct(id) {
   var products = getStore('ff_products');
   var p = products.find(function (p) { return p.id === id; });
   if (p) {
-    p.available = !(p.available !== false);
+    p.available = !p.available;
     setStore('ff_products', products);
     var farmer = getFarmer();
     if (farmer) renderMyProducts(farmer);
@@ -358,7 +358,7 @@ function renderEarnings(farmer) {
   // Monthly Breakdown bar chart
   var monthlyMap = {};
   deliveredOrders.forEach(function (o) {
-    var month = o.date ? o.date.slice(0, 7) : 'Unknown';
+    var month = (o.date && o.date.length >= 7) ? o.date.slice(0, 7) : 'Unknown';
     var myItems = getMyItemsInOrder(o, farmer.name);
     var subtotal = myItems.reduce(function (s, i) { return s + i.price * i.quantity; }, 0);
     monthlyMap[month] = (monthlyMap[month] || 0) + subtotal;

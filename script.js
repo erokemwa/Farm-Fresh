@@ -394,7 +394,7 @@ if (checkoutForm) {
     var btnPrintReceipt = document.getElementById('btn-print-receipt');
 
     if (receiptBlock) {
-      var orderDate = new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
+      var orderDate = new Date().toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' });
       if (receiptMeta) receiptMeta.innerHTML = 'Order ID: <strong>' + escapeHtml(newOrderId) + '</strong> &nbsp;|&nbsp; Date: ' + escapeHtml(orderDate);
 
       var receiptCustomer = document.getElementById('receipt-customer');
