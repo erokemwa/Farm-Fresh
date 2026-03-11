@@ -68,8 +68,20 @@ function seedAdminData() {
   }
   if (!localStorage.getItem('ff_farmers')) {
     setStore('ff_farmers', [
-      { id: 'f1', name: 'John Kamau', location: 'Nakuru, Kenya', bio: 'John has been farming organically for over 15 years, specialising in tomatoes and leafy greens grown without pesticides.', phone: '0711111111', email: 'john@farmfresh.co.ke' },
-      { id: 'f2', name: 'Amina Wanjiru', location: 'Kiambu, Kenya', bio: 'Amina runs a family farm famous for its award-winning spinach and zucchini, using traditional irrigation methods.', phone: '0722222222', email: 'amina@farmfresh.co.ke' }
+      {
+        id: 'f1', name: 'John Kamau', location: 'Nakuru, Kenya',
+        bio: 'John has been farming organically for over 15 years, specialising in tomatoes and leafy greens grown without pesticides.',
+        phone: '0711111111', email: 'john@farmfresh.co.ke',
+        ratings: { overall: 4.7, freshness: 4.8, delivery: 4.6, packaging: 4.5, communication: 4.9, value: 4.7, consistency: 4.6 },
+        totalReviews: 23, badges: ['Top Seller', 'Eco Packaging']
+      },
+      {
+        id: 'f2', name: 'Amina Wanjiru', location: 'Kiambu, Kenya',
+        bio: 'Amina runs a family farm famous for its award-winning spinach and zucchini, using traditional irrigation methods.',
+        phone: '0722222222', email: 'amina@farmfresh.co.ke',
+        ratings: { overall: 4.5, freshness: 4.6, delivery: 4.4, packaging: 4.7, communication: 4.3, value: 4.5, consistency: 4.4 },
+        totalReviews: 18, badges: ['Eco Packaging', 'Best Value']
+      }
     ]);
   }
   if (!localStorage.getItem('ff_users')) {
@@ -124,9 +136,15 @@ function seedAdminData() {
 // ===== Product Image Map =====
 var PRODUCT_IMAGES = { 'p1': 'product-1.png', 'p2': 'product-2.png', 'p3': 'product-3.png' };
 
+// ===== Constants =====
+var KENYAN_PHONE_RE = /^0[17]\d{8}$/;
+var KES_TO_USD_RATE = 130;
+var BTC_USD_PRICE = 60000;
+
 // ===== Render Products from localStorage =====
 function renderProducts() {
   var products = getStore('ff_products');
+  var farmers = getStore('ff_farmers');
   var ul = document.querySelector('#products ul');
   if (!ul) return;
   ul.innerHTML = '';
@@ -145,8 +163,13 @@ function renderProducts() {
     li.innerHTML =
       '<img src="' + escapeHtml(imgSrc) + '" alt="' + escapeHtml(p.name) + '" loading="lazy">' +
       '<h3>' + escapeHtml(p.name) + '</h3>' +
-      '<small>By ' + escapeHtml(p.farmer) + '</small>' +
-      (p.originalPrice && p.originalPrice !== p.price
+      (function() {
+        var pFarmer = farmers.find(function(f) { return f.id === p.farmerId || f.name === p.farmer; });
+        var overall = pFarmer && pFarmer.ratings ? pFarmer.ratings.overall : null;
+        return '<small class="product-farmer-info">By ' + escapeHtml(p.farmer) +
+          (overall ? ' <span class="product-farmer-rating" aria-label="' + overall.toFixed(1) + ' out of 5 stars">⭐ ' + overall.toFixed(1) + '</span>' : '') +
+        '</small>';
+      })() +      (p.originalPrice && p.originalPrice !== p.price
         ? '<del class="price-was">KES ' + escapeHtml(String(p.originalPrice)) + '</del>'
         : '') +
       '<p>KES ' + escapeHtml(String(p.price)) + '</p>' +
@@ -174,6 +197,52 @@ function renderProducts() {
   });
 }
 
+// ===== Farmer Rating Helpers =====
+
+// Generate star rating HTML (filled/half/empty)
+function starsHtml(score, labelText) {
+  var filled = Math.floor(score);
+  var half = score - filled >= 0.25 && score - filled < 0.75;
+  var empty = 5 - filled - (half ? 1 : 0);
+  var html = '';
+  for (var i = 0; i < filled; i++) html += '<span class="star star-full" aria-hidden="true">★</span>';
+  if (half) html += '<span class="star star-half" aria-hidden="true">★</span>';
+  for (var i = 0; i < empty; i++) html += '<span class="star star-empty" aria-hidden="true">☆</span>';
+  return '<span class="stars-display" aria-label="' + escapeHtml(labelText || (score + ' out of 5 stars')) + '">' + html + '</span>';
+}
+
+// Metric bars HTML for farmer card
+function metricBarsHtml(ratings) {
+  var metrics = [
+    { key: 'freshness', label: 'Freshness' },
+    { key: 'delivery', label: 'Delivery' },
+    { key: 'packaging', label: 'Packaging' },
+    { key: 'communication', label: 'Communication' },
+    { key: 'value', label: 'Value' },
+    { key: 'consistency', label: 'Consistency' }
+  ];
+  return '<div class="metric-bars">' + metrics.map(function(m) {
+    var score = (ratings && ratings[m.key]) ? ratings[m.key] : 0;
+    var pct = (score / 5) * 100;
+    return '<div class="metric-bar-row">' +
+      '<span class="metric-label">' + escapeHtml(m.label) + '</span>' +
+      '<div class="metric-bar-track"><div class="metric-bar-fill" style="width:0%" data-width="' + pct.toFixed(1) + '%"></div></div>' +
+      '<span class="metric-score">' + score.toFixed(1) + '</span>' +
+    '</div>';
+  }).join('') + '</div>';
+}
+
+// Badge icons map
+var BADGE_ICONS = { 'Top Seller': '🏆', 'Eco Packaging': '🌿', 'Best Value': '💰', 'Fast Delivery': '⚡', 'Organic Certified': '✅' };
+
+function badgesHtml(badges) {
+  if (!badges || !badges.length) return '';
+  return '<div class="farmer-badges">' + badges.map(function(b) {
+    var icon = BADGE_ICONS[b] || '🎖️';
+    return '<span class="farmer-badge-pill">' + icon + ' ' + escapeHtml(b) + '</span>';
+  }).join('') + '</div>';
+}
+
 // ===== Render Farmers from localStorage =====
 function renderFarmers() {
   var farmers = getStore('ff_farmers');
@@ -182,14 +251,42 @@ function renderFarmers() {
   grid.innerHTML = '';
 
   farmers.forEach(function (f) {
+    var ratings = f.ratings || { overall: 0, freshness: 0, delivery: 0, packaging: 0, communication: 0, value: 0, consistency: 0 };
+    var totalReviews = f.totalReviews || 0;
+    var overall = ratings.overall || 0;
+
     var card = document.createElement('div');
     card.className = 'farmer-card';
     card.innerHTML =
       '<h3>' + escapeHtml(f.name) + '</h3>' +
       '<p class="farmer-location">📍 ' + escapeHtml(f.location) + '</p>' +
       '<p class="farmer-bio">' + escapeHtml(f.bio) + '</p>' +
-      '<a href="#products" class="farmer-link">View Products</a>';
+      '<div class="farmer-rating-summary">' +
+        starsHtml(overall, overall.toFixed(1) + ' out of 5 stars') +
+        '<span class="farmer-rating-score">' + overall.toFixed(1) + '</span>' +
+        '<span class="farmer-review-count">(' + totalReviews + ' reviews)</span>' +
+      '</div>' +
+      metricBarsHtml(ratings) +
+      badgesHtml(f.badges) +
+      '<div class="farmer-card-actions">' +
+        '<a href="#products" class="farmer-link">View Products</a>' +
+        '<button type="button" class="btn-rate-farmer" data-farmer-id="' + escapeHtml(f.id) + '">Rate This Farmer</button>' +
+      '</div>';
     grid.appendChild(card);
+  });
+
+  // Animate metric bars after render
+  setTimeout(function() {
+    document.querySelectorAll('.metric-bar-fill').forEach(function(bar) {
+      bar.style.width = bar.dataset.width;
+    });
+  }, 100);
+
+  // Attach rate-farmer button listeners
+  document.querySelectorAll('.btn-rate-farmer').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      openRatingModal(btn.dataset.farmerId);
+    });
   });
 }
 
@@ -328,32 +425,188 @@ function attachQtySteppers() {
   });
 }
 
-// ===== Checkout Button: show form + populate summary table =====
+// ===== Checkout Wizard State =====
+var wizardPromoApplied = false;
+var wizardGrandTotal = 0;
+
+// ===== Step Navigation =====
+function goToStep(n) {
+  [1, 2, 3].forEach(function(i) {
+    var step = document.getElementById('checkout-step-' + i);
+    var ind = document.getElementById('step-indicator-' + i);
+    if (step) step.hidden = (i !== n);
+    if (ind) {
+      ind.classList.toggle('active', i === n);
+      if (i === n) ind.setAttribute('aria-current', 'step');
+      else ind.removeAttribute('aria-current');
+    }
+  });
+  var wrapper = document.getElementById('checkout-form-wrapper');
+  if (wrapper) wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ===== Step 1: Cart Table =====
+function renderCheckoutCartTable() {
+  var wrapper = document.getElementById('checkout-cart-table-wrapper');
+  if (!wrapper) return;
+  if (cartItems.length === 0) {
+    wrapper.innerHTML = '<p style="color:#777;font-style:italic;">Your cart is empty.</p>';
+    return;
+  }
+  var rows = cartItems.map(function(item) {
+    var safe = escapeHtml(item.name);
+    return '<tr>' +
+      '<td>' + safe + '</td>' +
+      '<td><div class="cart-qty-controls">' +
+        '<button type="button" class="cart-qty-btn" data-action="minus" data-name="' + safe + '" aria-label="Decrease quantity">−</button>' +
+        '<span class="cart-qty-num">' + item.quantity + '</span>' +
+        '<button type="button" class="cart-qty-btn" data-action="plus" data-name="' + safe + '" aria-label="Increase quantity">+</button>' +
+      '</div></td>' +
+      '<td><button type="button" class="btn-remove-cart-item" data-name="' + safe + '" aria-label="Remove ' + safe + '">🗑</button></td>' +
+      '<td>' + formatKES(item.price) + '</td>' +
+      '<td>' + formatKES(item.price * item.quantity) + '</td>' +
+    '</tr>';
+  }).join('');
+  wrapper.innerHTML =
+    '<table class="checkout-cart-table">' +
+      '<thead><tr><th>Item</th><th>Qty</th><th>Remove</th><th>Unit Price</th><th>Subtotal</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+    '</table>';
+
+  wrapper.querySelectorAll('.cart-qty-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var name = btn.dataset.name;
+      var action = btn.dataset.action;
+      var item = cartItems.find(function(i) { return i.name === name; });
+      if (!item) return;
+      if (action === 'minus') { if (item.quantity > 1) item.quantity--; else return; }
+      else item.quantity++;
+      updateCartDisplay();
+      renderCheckoutCartTable();
+      renderFeeSummary();
+      updateStep1NextBtn();
+    });
+  });
+  wrapper.querySelectorAll('.btn-remove-cart-item').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var name = btn.dataset.name;
+      cartItems = cartItems.filter(function(i) { return i.name !== name; });
+      updateCartDisplay();
+      renderCheckoutCartTable();
+      renderFeeSummary();
+      updateStep1NextBtn();
+    });
+  });
+}
+
+function computeTotals() {
+  var subtotal = cartItems.reduce(function(a, i) { return a + i.price * i.quantity; }, 0);
+  var delivery = subtotal >= 500 ? 0 : 80;
+  var discount = wizardPromoApplied ? Math.round(subtotal * 0.1) : 0;
+  wizardGrandTotal = subtotal + delivery - discount;
+  return { subtotal: subtotal, delivery: delivery, discount: discount, grand: wizardGrandTotal };
+}
+
+function renderFeeSummary() {
+  var el = document.getElementById('checkout-fee-summary');
+  if (!el) return;
+  var t = computeTotals();
+  var html = '<div class="fee-row"><span>Subtotal</span><span>' + formatKES(t.subtotal) + '</span></div>';
+  html += '<div class="fee-row"><span>Delivery</span><span>' + (t.delivery === 0 ? '🆓 Free' : formatKES(t.delivery)) + '</span></div>';
+  if (t.discount > 0) {
+    html += '<div class="fee-row discount-row"><span>Promo (FRESH10 −10%)</span><span>−' + formatKES(t.discount) + '</span></div>';
+  }
+  html += '<div class="fee-row grand-total"><span>Grand Total</span><span>' + formatKES(t.grand) + '</span></div>';
+  el.innerHTML = html;
+}
+
+function updateStep1NextBtn() {
+  var btn = document.getElementById('btn-step1-next');
+  if (!btn) return;
+  var nameEl = document.getElementById('checkout-name');
+  var phoneEl = document.getElementById('checkout-phone');
+  var addrEl = document.getElementById('checkout-address');
+  var nameVal = nameEl ? nameEl.value.trim() : '';
+  var phoneVal = phoneEl ? phoneEl.value.replace(/\s/g, '') : '';
+  var addrVal = addrEl ? addrEl.value.trim() : '';
+  btn.disabled = !(cartItems.length > 0 && nameVal && KENYAN_PHONE_RE.test(phoneVal) && addrVal);
+}
+
+// ===== Checkout Button: open wizard =====
 checkoutButton.addEventListener('click', function () {
   if (cartItems.length === 0) return;
-  if (checkoutFormWrapper) {
-    checkoutFormWrapper.hidden = false;
+  if (checkoutFormWrapper) checkoutFormWrapper.hidden = false;
+  goToStep(1);
+  renderCheckoutCartTable();
+  wizardPromoApplied = false;
+  var promoMsg = document.getElementById('promo-msg');
+  if (promoMsg) { promoMsg.textContent = ''; promoMsg.className = 'promo-msg'; }
+  var promoInput = document.getElementById('promo-code-input');
+  if (promoInput) promoInput.value = '';
+  renderFeeSummary();
+
+  // Pre-fill from last customer
+  try {
+    var last = JSON.parse(localStorage.getItem('ff_last_customer') || 'null');
+    if (last) {
+      var nEl = document.getElementById('checkout-name');
+      var phEl = document.getElementById('checkout-phone');
+      var adEl = document.getElementById('checkout-address');
+      if (nEl && last.name) nEl.value = last.name;
+      if (phEl && last.phone) phEl.value = last.phone;
+      if (adEl && last.address) adEl.value = last.address;
+    }
+  } catch(e) {}
+  updateStep1NextBtn();
+
+  // Promo code handler
+  var promoBtn = document.getElementById('btn-apply-promo');
+  if (promoBtn) {
+    promoBtn.onclick = function() {
+      var pInput = document.getElementById('promo-code-input');
+      var pMsg = document.getElementById('promo-msg');
+      var code = pInput ? pInput.value.trim().toUpperCase() : '';
+      if (code === 'FRESH10') {
+        wizardPromoApplied = true;
+        if (pMsg) { pMsg.textContent = '✅ 10% discount applied!'; pMsg.className = 'promo-msg promo-success'; }
+      } else {
+        wizardPromoApplied = false;
+        if (pMsg) { pMsg.textContent = '❌ Invalid promo code.'; pMsg.className = 'promo-msg promo-error'; }
+      }
+      renderFeeSummary();
+    };
   }
-  var summaryEl = document.getElementById('order-summary-preview');
-  if (summaryEl) {
-    var rows = cartItems.map(function (i) {
-      return '<tr>' +
-        '<td>' + escapeHtml(i.name) + '</td>' +
-        '<td class="summary-qty">\xD7' + i.quantity + '</td>' +
-        '<td class="summary-price">' + formatKES(i.price) + '</td>' +
-        '<td class="summary-price">' + formatKES(i.price * i.quantity) + '</td>' +
-        '</tr>';
-    }).join('');
-    var grandTotal = cartItems.reduce(function (a, i) { return a + i.price * i.quantity; }, 0);
-    summaryEl.innerHTML =
-      '<table class="summary-table">' +
-        '<thead><tr><th>Item</th><th>Qty</th><th>Unit</th><th>Total</th></tr></thead>' +
-        '<tbody>' + rows + '</tbody>' +
-        '<tfoot><tr>' +
-          '<td colspan="3"><strong>Grand Total</strong></td>' +
-          '<td class="summary-price"><strong>' + formatKES(grandTotal) + '</strong></td>' +
-        '</tr></tfoot>' +
-      '</table>';
+
+  // Blur & input validation for delivery fields
+  ['checkout-name', 'checkout-phone', 'checkout-address'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.onblur = function() { validateCheckoutField(el); updateStep1NextBtn(); };
+      el.oninput = function() { updateStep1NextBtn(); };
+    }
+  });
+
+  // Step 1 next button
+  var btnNext = document.getElementById('btn-step1-next');
+  if (btnNext) {
+    btnNext.onclick = function() {
+      var nameInput = document.getElementById('checkout-name');
+      var phoneInput = document.getElementById('checkout-phone');
+      var addressInput = document.getElementById('checkout-address');
+      var v1 = validateCheckoutField(nameInput);
+      var v2 = validateCheckoutField(phoneInput);
+      var v3 = validateCheckoutField(addressInput);
+      if (!v1 || !v2 || !v3) return;
+      try {
+        localStorage.setItem('ff_last_customer', JSON.stringify({
+          name: nameInput.value.trim(),
+          phone: phoneInput.value.replace(/\s/g, ''),
+          address: addressInput.value.trim()
+        }));
+      } catch(e) {}
+      goToStep(2);
+      initStep2();
+    };
   }
 });
 
@@ -388,7 +641,7 @@ function validateCheckoutField(input) {
       showFieldError(input, 'Please enter your phone number');
       return false;
     }
-    if (!/^0[17]\d{8}$/.test(cleanPhone)) {
+    if (!KENYAN_PHONE_RE.test(cleanPhone)) {
       showFieldError(input, 'Please enter a valid Kenyan phone number (e.g. 0712 345 678)');
       return false;
     }
@@ -402,156 +655,381 @@ function validateCheckoutField(input) {
   return true;
 }
 
-// ===== Checkout Form =====
-if (checkoutForm) {
-  // Blur validation
-  ['checkout-name', 'checkout-phone', 'checkout-address'].forEach(function (id) {
-    var el = document.getElementById(id);
-    if (el) el.addEventListener('blur', function () { validateCheckoutField(el); });
+// ===== Step 2: Payment Method =====
+function initStep2() {
+  // Wire payment method card selection
+  document.querySelectorAll('.payment-method-card').forEach(function(label) {
+    label.onclick = function() {
+      document.querySelectorAll('.payment-method-card').forEach(function(l) { l.classList.remove('selected'); });
+      label.classList.add('selected');
+      var radio = label.querySelector('input[type="radio"]');
+      if (radio) showPaymentPanel(radio.value);
+    };
   });
 
-  checkoutForm.addEventListener('submit', function (event) {
-    event.preventDefault();
+  showPaymentPanel('mpesa');
+  initMpesaPanel();
+  initCardPanel();
+  initCryptoPanel();
 
-    var nameInput = document.getElementById('checkout-name');
-    var phoneInput = document.getElementById('checkout-phone');
-    var addressInput = document.getElementById('checkout-address');
+  var btnBack = document.getElementById('btn-step2-back');
+  if (btnBack) btnBack.onclick = function() { goToStep(1); renderCheckoutCartTable(); renderFeeSummary(); };
+}
 
-    var validName = validateCheckoutField(nameInput);
-    var validPhone = validateCheckoutField(phoneInput);
-    var validAddress = validateCheckoutField(addressInput);
-    if (!validName || !validPhone || !validAddress) return;
+function showPaymentPanel(method) {
+  ['mpesa', 'card', 'crypto'].forEach(function(m) {
+    var panel = document.getElementById('panel-' + m);
+    if (panel) panel.hidden = (m !== method);
+  });
+}
 
-    var name = nameInput.value.trim();
-    var phone = phoneInput.value.replace(/\s/g, '');
-    var address = addressInput.value.trim();
-    var totalValue = cartItems.reduce(function (a, i) { return a + i.price * i.quantity; }, 0);
-
-    // Look up or create customer in ff_users
-    var users = getStore('ff_users');
-    var existingUser = users.find(function (u) { return u.phone === phone; });
-    var customerId;
-    if (existingUser) {
-      existingUser.ordersCount = (existingUser.ordersCount || 0) + 1;
-      customerId = existingUser.id;
-      setStore('ff_users', users);
-    } else {
-      customerId = 'cust-' + Date.now();
-      users.push({ id: customerId, name: name, phone: phone, address: address, ordersCount: 1 });
-      setStore('ff_users', users);
+function initMpesaPanel() {
+  var phoneEl = document.getElementById('checkout-phone');
+  var mpesaEl = document.getElementById('mpesa-phone');
+  if (mpesaEl && phoneEl) {
+    var clean = phoneEl.value.replace(/\s/g, '');
+    if (KENYAN_PHONE_RE.test(clean)) mpesaEl.value = clean;
+  }
+  var btn = document.getElementById('btn-pay-mpesa');
+  if (!btn) return;
+  btn.onclick = function() {
+    var phoneInput = document.getElementById('mpesa-phone');
+    var errEl = document.getElementById('mpesa-phone-error');
+    var phone = phoneInput ? phoneInput.value.replace(/\s/g, '') : '';
+    if (!KENYAN_PHONE_RE.test(phone)) {
+      if (errEl) { errEl.textContent = 'Please enter a valid Kenyan phone number (e.g. 0712 345 678)'; errEl.style.display = 'block'; }
+      return;
     }
+    if (errEl) errEl.style.display = 'none';
+    var spinnerMsg = document.getElementById('mpesa-spinner-msg');
+    var statusText = document.getElementById('mpesa-status-text');
+    if (spinnerMsg) spinnerMsg.hidden = false;
+    if (statusText) statusText.textContent = 'STK Push sent to ' + phone + ' — Enter your M-Pesa PIN on your phone';
+    btn.disabled = true;
+    setTimeout(function() {
+      if (spinnerMsg) spinnerMsg.hidden = true;
+      btn.disabled = false;
+      placeOrder('M-Pesa', phone);
+    }, 4000);
+  };
+}
 
-    // Persist order to ff_orders
-    var orders = getStore('ff_orders');
-    var newOrderId = 'ord-' + Date.now();
-    orders.push({
-      id: newOrderId,
-      customerId: customerId,
-      customer: name,
-      phone: phone,
-      address: address,
-      items: cartItems.map(function (i) {
-        return {
-          productId:  i.productId || '',
-          farmerId:   i.farmerId || '',
-          farmerName: i.farmerName || '',
-          name:       i.name,
-          quantity:   i.quantity,
-          price:      i.price,
-          subtotal:   i.price * i.quantity,
-          itemStatus: 'Pending'
-        };
-      }),
-      total: totalValue,
-      status: 'Pending',
-      date: new Date().toISOString().slice(0, 10)
+function initCardPanel() {
+  var cardNumEl = document.getElementById('card-number');
+  var cardTypeIcon = document.getElementById('card-type-icon');
+  if (cardNumEl) {
+    cardNumEl.addEventListener('input', function() {
+      var raw = cardNumEl.value.replace(/\D/g, '').slice(0, 16);
+      var parts = raw.match(/.{1,4}/g);
+      cardNumEl.value = parts ? parts.join(' ') : raw;
+      if (cardTypeIcon) {
+        if (raw.startsWith('4')) cardTypeIcon.textContent = '💳 Visa';
+        else if (raw.startsWith('5')) cardTypeIcon.textContent = '💳 Mastercard';
+        else cardTypeIcon.textContent = '';
+      }
     });
-    setStore('ff_orders', orders);
+    cardNumEl.addEventListener('blur', function() {
+      var raw = cardNumEl.value.replace(/\D/g, '');
+      var errEl = document.getElementById('card-number-error');
+      if (errEl) errEl.textContent = (!raw || raw.length < 13) ? 'Please enter a valid card number' : '';
+    });
+  }
+  var expiryEl = document.getElementById('card-expiry');
+  if (expiryEl) {
+    expiryEl.addEventListener('input', function() {
+      var raw = expiryEl.value.replace(/\D/g, '');
+      if (raw.length >= 3) expiryEl.value = raw.slice(0, 2) + ' / ' + raw.slice(2, 4);
+      else expiryEl.value = raw;
+    });
+    expiryEl.addEventListener('blur', function() {
+      var errEl = document.getElementById('card-expiry-error');
+      var val = expiryEl.value.replace(/\D/g, '');
+      if (errEl) errEl.textContent = (!val || val.length < 4) ? 'Please enter a valid expiry (MM/YY)' : '';
+    });
+  }
+  var cvvEl = document.getElementById('card-cvv');
+  if (cvvEl) {
+    cvvEl.addEventListener('blur', function() {
+      var errEl = document.getElementById('card-cvv-error');
+      if (errEl) errEl.textContent = (!cvvEl.value || cvvEl.value.length < 3) ? 'Please enter a valid CVV' : '';
+    });
+  }
+  var cardNameEl = document.getElementById('card-name');
+  if (cardNameEl) {
+    cardNameEl.addEventListener('blur', function() {
+      var errEl = document.getElementById('card-name-error');
+      if (errEl) errEl.textContent = !cardNameEl.value.trim() ? 'Please enter the cardholder name' : '';
+    });
+  }
+  var btnPayCard = document.getElementById('btn-pay-card');
+  if (btnPayCard) {
+    btnPayCard.onclick = function() {
+      var numRaw = cardNumEl ? cardNumEl.value.replace(/\D/g, '') : '';
+      var nameVal = cardNameEl ? cardNameEl.value.trim() : '';
+      var expVal = expiryEl ? expiryEl.value.replace(/\D/g, '') : '';
+      var cvvVal = cvvEl ? cvvEl.value : '';
+      var numErr = document.getElementById('card-number-error');
+      var nameErr = document.getElementById('card-name-error');
+      var expErr = document.getElementById('card-expiry-error');
+      var cvvErr = document.getElementById('card-cvv-error');
+      var hasError = false;
+      if (!numRaw || numRaw.length < 13) { if (numErr) numErr.textContent = 'Please enter a valid card number'; hasError = true; } else { if (numErr) numErr.textContent = ''; }
+      if (!nameVal) { if (nameErr) nameErr.textContent = 'Please enter the cardholder name'; hasError = true; } else { if (nameErr) nameErr.textContent = ''; }
+      if (!expVal || expVal.length < 4) { if (expErr) expErr.textContent = 'Please enter a valid expiry (MM/YY)'; hasError = true; } else { if (expErr) expErr.textContent = ''; }
+      if (!cvvVal || cvvVal.length < 3) { if (cvvErr) cvvErr.textContent = 'Please enter a valid CVV'; hasError = true; } else { if (cvvErr) cvvErr.textContent = ''; }
+      if (hasError) return;
+      var cardType = numRaw.startsWith('4') ? 'Visa' : (numRaw.startsWith('5') ? 'Mastercard' : 'Card');
+      var maskedDetail = cardType + ' ···' + numRaw.slice(-4);
+      var spinnerMsg = document.getElementById('card-spinner-msg');
+      if (spinnerMsg) spinnerMsg.hidden = false;
+      btnPayCard.disabled = true;
+      setTimeout(function() {
+        if (spinnerMsg) spinnerMsg.hidden = true;
+        btnPayCard.disabled = false;
+        placeOrder('Card', maskedDetail);
+      }, 2000);
+    };
+  }
+}
 
-    // Show inline confirmation
-    if (orderConfirmation) orderConfirmation.hidden = false;
-    if (checkoutFormWrapper) checkoutFormWrapper.hidden = true;
-    cartList.style.display = 'none';
-    var totalLine = cart.querySelector('.cart-total-line');
-    if (totalLine) totalLine.style.display = 'none';
-    checkoutButton.style.display = 'none';
-
-    // ===== Populate & Show Receipt =====
-    var receiptBlock = document.getElementById('receipt-block');
-    var receiptMeta = document.getElementById('receipt-meta');
-    var receiptItems = document.getElementById('receipt-items');
-    var receiptGrandTotal = document.getElementById('receipt-grand-total');
-    var receiptAddress = document.getElementById('receipt-address');
-    var receiptPhone = document.getElementById('receipt-phone');
-    var btnPrintReceipt = document.getElementById('btn-print-receipt');
-
-    if (receiptBlock) {
-      var orderDate = new Date().toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' });
-      if (receiptMeta) receiptMeta.innerHTML = 'Order ID: <strong>' + escapeHtml(newOrderId) + '</strong> &nbsp;|&nbsp; Date: ' + escapeHtml(orderDate);
-
-      var receiptCustomer = document.getElementById('receipt-customer');
-      if (receiptCustomer) receiptCustomer.textContent = 'Customer: ' + name;
-
-      if (receiptItems) {
-        // Group cart items by farmer
-        var farmerGroups = [];
-        cartItems.forEach(function (i) {
-          var farmerKey = i.farmerId || 'unknown';
-          var group = farmerGroups.find(function (g) { return g.farmerId === farmerKey; });
-          if (!group) {
-            group = { farmerId: farmerKey, farmerName: i.farmerName || 'Unknown Farmer', items: [] };
-            farmerGroups.push(group);
-          }
-          group.items.push(i);
-        });
-
-        var rowsHtml = '';
-        farmerGroups.forEach(function (group) {
-          rowsHtml += '<tr class="receipt-farmer-group-header"><td colspan="4">👨‍🌾 ' + escapeHtml(group.farmerName) + '</td></tr>';
-          group.items.forEach(function (i) {
-            rowsHtml +=
-              '<tr>' +
-              '<td>' + escapeHtml(i.name) + ' <small class="receipt-farmer">by ' + escapeHtml(i.farmerName || '') + '</small></td>' +
-              '<td class="receipt-qty">' + i.quantity + '</td>' +
-              '<td class="receipt-price">' + formatKES(i.price) + '</td>' +
-              '<td class="receipt-price">' + formatKES(i.price * i.quantity) + '</td>' +
-              '</tr>';
-          });
-        });
-        receiptItems.innerHTML = rowsHtml;
-      }
-
-      if (receiptGrandTotal) receiptGrandTotal.textContent = formatKES(totalValue);
-      if (receiptAddress) receiptAddress.textContent = address;
-      if (receiptPhone) receiptPhone.textContent = phone;
-
-      // Shipping status badge
-      var receiptStatusBadge = document.getElementById('receipt-status-badge');
-      if (receiptStatusBadge) {
-        var currentOrders = getStore('ff_orders');
-        var thisOrder = currentOrders.find(function (o) { return o.id === newOrderId; });
-        var status = thisOrder ? thisOrder.status : 'Pending';
-        var badgeCls = 'receipt-badge-pending';
-        if (status === 'Confirmed') badgeCls = 'receipt-badge-confirmed';
-        else if (status === 'Dispatched') badgeCls = 'receipt-badge-dispatched';
-        else if (status === 'Delivered') badgeCls = 'receipt-badge-delivered';
-        receiptStatusBadge.innerHTML = '<span class="receipt-status-badge ' + badgeCls + '">' + escapeHtml(status) + '</span>';
-      }
-
-      receiptBlock.hidden = false;
-      if (btnPrintReceipt) btnPrintReceipt.hidden = false;
-    }
-
-    setTimeout(function () {
-      cartItems = [];
-      if (orderConfirmation) orderConfirmation.hidden = true;
-      // Do NOT hide receipt-block or btn-print-receipt here — user needs time to print
-      cartList.style.display = '';
-      if (totalLine) totalLine.style.display = '';
-      checkoutForm.reset();
-      updateCartDisplay();
-    }, 3000);
+function initCryptoPanel() {
+  updateCryptoPanel();
+  document.querySelectorAll('input[name="crypto-coin"]').forEach(function(radio) {
+    radio.addEventListener('change', updateCryptoPanel);
   });
+  var copyBtn = document.getElementById('btn-copy-address');
+  if (copyBtn) {
+    copyBtn.onclick = function() {
+      var addrEl = document.getElementById('crypto-address');
+      if (!addrEl) return;
+      try {
+        navigator.clipboard.writeText(addrEl.value);
+      } catch(e) {
+        var ta = document.createElement('textarea');
+        ta.value = addrEl.value;
+        ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      copyBtn.textContent = '✅ Copied!';
+      setTimeout(function() { copyBtn.textContent = '📋 Copy'; }, 2000);
+    };
+  }
+  var payBtn = document.getElementById('btn-pay-crypto');
+  if (payBtn) {
+    payBtn.onclick = function() {
+      var coinRadio = document.querySelector('input[name="crypto-coin"]:checked');
+      var coin = coinRadio ? coinRadio.value.toUpperCase() : 'USDT';
+      var amtDisplay = document.getElementById('crypto-amount-display');
+      var amtText = amtDisplay ? amtDisplay.textContent.trim() : '';
+      placeOrder('Crypto', coin + ' — ' + amtText);
+    };
+  }
+}
+
+function updateCryptoPanel() {
+  var coinRadio = document.querySelector('input[name="crypto-coin"]:checked');
+  var coin = coinRadio ? coinRadio.value : 'usdt';
+  var t = computeTotals();
+  var usd = t.grand / KES_TO_USD_RATE;
+  var amountDisplay = document.getElementById('crypto-amount-display');
+  var addrEl = document.getElementById('crypto-address');
+  var noteEl = document.getElementById('crypto-note');
+  var qrGrid = document.getElementById('qr-grid');
+  if (coin === 'usdt') {
+    var usdt = usd.toFixed(2);
+    if (amountDisplay) amountDisplay.textContent = usdt + ' USDT (TRC-20)  ≈  ' + formatKES(t.grand);
+    if (addrEl) addrEl.value = 'TRC20Walletxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'; // Mock address — replace with real wallet in production
+    if (noteEl) noteEl.textContent = 'Send exactly ' + usdt + ' USDT (TRC-20) to the address above. Payment confirmed after 1 network confirmation (~1 min).';
+  } else {
+    var btc = (usd / BTC_USD_PRICE).toFixed(8);
+    if (amountDisplay) amountDisplay.textContent = btc + ' BTC  ≈  ' + formatKES(t.grand);
+    if (addrEl) addrEl.value = 'bc1qxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'; // Mock address — replace with real wallet in production
+    if (noteEl) noteEl.textContent = 'Send exactly ' + btc + ' BTC to the address above. Payment confirmed after 1 block confirmation (~10 min).';
+  }
+  // Generate a mock QR visual (CSS grid) with finder patterns in corners — not a valid QR code
+  if (qrGrid) {
+    var cells = '';
+    for (var row = 0; row < 10; row++) {
+      for (var col = 0; col < 10; col++) {
+        var isFinder = (row < 3 && col < 3) || (row < 3 && col > 6) || (row > 6 && col < 3);
+        var dark = isFinder || (Math.sin(row * 7 + col * 13 + coin.length) > 0);
+        cells += '<div class="qr-cell ' + (dark ? 'dark' : 'light') + '"></div>';
+      }
+    }
+    qrGrid.innerHTML = cells;
+  }
+}
+
+// ===== Step 3: Place Order & Confirmation =====
+function placeOrder(paymentMethod, paymentDetail) {
+  var nameInput = document.getElementById('checkout-name');
+  var phoneInput = document.getElementById('checkout-phone');
+  var addressInput = document.getElementById('checkout-address');
+  var name = nameInput ? nameInput.value.trim() : '';
+  var phone = phoneInput ? phoneInput.value.replace(/\s/g, '') : '';
+  var address = addressInput ? addressInput.value.trim() : '';
+  var t = computeTotals();
+
+  // Look up or create customer
+  var users = getStore('ff_users');
+  var existingUser = users.find(function (u) { return u.phone === phone; });
+  var customerId;
+  if (existingUser) {
+    existingUser.ordersCount = (existingUser.ordersCount || 0) + 1;
+    customerId = existingUser.id;
+    setStore('ff_users', users);
+  } else {
+    customerId = 'cust-' + Date.now();
+    users.push({ id: customerId, name: name, phone: phone, address: address, ordersCount: 1 });
+    setStore('ff_users', users);
+  }
+
+  // Capture items before clearing cart (for receipt)
+  var orderedItems = cartItems.slice();
+
+  // Persist order
+  var orders = getStore('ff_orders');
+  var newOrderId = 'ord-' + Date.now();
+  orders.push({
+    id: newOrderId,
+    customerId: customerId,
+    customer: name,
+    phone: phone,
+    address: address,
+    paymentMethod: paymentMethod,
+    paymentDetail: paymentDetail,
+    items: orderedItems.map(function (i) {
+      return { productId: i.productId || '', farmerId: i.farmerId || '', farmerName: i.farmerName || '', name: i.name, quantity: i.quantity, price: i.price, subtotal: i.price * i.quantity, itemStatus: 'Pending' };
+    }),
+    total: t.grand,
+    discount: t.discount,
+    deliveryFee: t.delivery,
+    status: 'Pending',
+    date: new Date().toISOString().slice(0, 10)
+  });
+  setStore('ff_orders', orders);
+
+  // Populate existing receipt-block for print compatibility
+  populatePrintReceiptBlock(newOrderId, name, phone, address, orderedItems, t, paymentMethod, paymentDetail);
+
+  // Go to step 3
+  goToStep(3);
+  renderStep3(newOrderId, name, phone, address, orderedItems, paymentMethod, paymentDetail, t);
+
+  // Clear cart
+  cartItems = [];
+  updateCartDisplay();
+}
+
+function populatePrintReceiptBlock(orderId, name, phone, address, items, totals, paymentMethod, paymentDetail) {
+  var receiptBlock = document.getElementById('receipt-block');
+  if (!receiptBlock) return;
+  var orderDate = new Date().toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' });
+  var receiptMeta = document.getElementById('receipt-meta');
+  if (receiptMeta) receiptMeta.innerHTML = 'Order ID: <strong>' + escapeHtml(orderId) + '</strong> &nbsp;|&nbsp; Date: ' + escapeHtml(orderDate) + ' &nbsp;|&nbsp; Payment: ' + escapeHtml(paymentMethod) + ' (' + escapeHtml(paymentDetail) + ')';
+  var receiptCustomer = document.getElementById('receipt-customer');
+  if (receiptCustomer) receiptCustomer.textContent = 'Customer: ' + name;
+  var receiptItemsEl = document.getElementById('receipt-items');
+  if (receiptItemsEl) {
+    var farmerGroups = [];
+    items.forEach(function (i) {
+      var key = i.farmerId || 'unknown';
+      var group = farmerGroups.find(function (g) { return g.farmerId === key; });
+      if (!group) { group = { farmerId: key, farmerName: i.farmerName || 'Unknown Farmer', items: [] }; farmerGroups.push(group); }
+      group.items.push(i);
+    });
+    var rowsHtml = '';
+    farmerGroups.forEach(function (group) {
+      rowsHtml += '<tr class="receipt-farmer-group-header"><td colspan="4">👨‍🌾 ' + escapeHtml(group.farmerName) + '</td></tr>';
+      group.items.forEach(function (i) {
+        rowsHtml += '<tr><td>' + escapeHtml(i.name) + ' <small class="receipt-farmer">by ' + escapeHtml(i.farmerName || '') + '</small></td><td class="receipt-qty">' + i.quantity + '</td><td class="receipt-price">' + formatKES(i.price) + '</td><td class="receipt-price">' + formatKES(i.price * i.quantity) + '</td></tr>';
+      });
+    });
+    receiptItemsEl.innerHTML = rowsHtml;
+  }
+  var receiptGrandTotal = document.getElementById('receipt-grand-total');
+  if (receiptGrandTotal) receiptGrandTotal.textContent = formatKES(totals.grand);
+  var receiptAddress = document.getElementById('receipt-address');
+  if (receiptAddress) receiptAddress.textContent = address;
+  var receiptPhone = document.getElementById('receipt-phone');
+  if (receiptPhone) receiptPhone.textContent = phone;
+  var receiptStatusBadge = document.getElementById('receipt-status-badge');
+  if (receiptStatusBadge) receiptStatusBadge.innerHTML = '<span class="receipt-status-badge receipt-badge-pending">Pending</span>';
+  receiptBlock.hidden = false;
+  var btnPrint = document.getElementById('btn-print-receipt');
+  if (btnPrint) btnPrint.hidden = false;
+}
+
+function renderStep3(orderId, name, phone, address, items, paymentMethod, paymentDetail, totals) {
+  var step3 = document.getElementById('checkout-step-3');
+  if (!step3) return;
+  var orderDate = new Date().toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Order stepper — Pending = done
+  var stepperSteps = ['Pending', 'Confirmed', 'Dispatched', 'Delivered'];
+  var stepperHtml = '<div class="order-stepper">';
+  stepperSteps.forEach(function(s, i) {
+    stepperHtml += '<div class="order-step">' +
+      '<div class="order-step-circle' + (i === 0 ? ' done' : '') + '">' + (i === 0 ? '✓' : (i + 1)) + '</div>' +
+      '<div class="order-step-label' + (i === 0 ? ' done' : '') + '">' + escapeHtml(s) + '</div>' +
+    '</div>';
+    if (i < stepperSteps.length - 1) stepperHtml += '<div class="order-step-connector"></div>';
+  });
+  stepperHtml += '</div>';
+
+  var itemRows = items.map(function(i) {
+    return '<tr><td>' + escapeHtml(i.name) + '</td><td>' + i.quantity + '</td><td>' + formatKES(i.price) + '</td><td>' + formatKES(i.price * i.quantity) + '</td></tr>';
+  }).join('');
+
+  step3.innerHTML =
+    '<div class="order-confirmation-card">' +
+      '<h3 style="color:var(--green);margin:0 0 4px;">✅ Order Placed!</h3>' +
+      '<p style="color:var(--muted);margin:0 0 16px;font-size:0.9rem;">Thank you for shopping with Farm Fresh. We\'ll contact you to confirm.</p>' +
+      '<p><strong>Order ID:</strong> ' + escapeHtml(orderId) + '</p>' +
+      '<p><strong>Date:</strong> ' + escapeHtml(orderDate) + '</p>' +
+      '<p><strong>Customer:</strong> ' + escapeHtml(name) + '</p>' +
+      '<p><strong>Phone:</strong> ' + escapeHtml(phone) + '</p>' +
+      '<p><strong>Address:</strong> ' + escapeHtml(address) + '</p>' +
+      '<p><strong>Payment:</strong> ' + escapeHtml(paymentMethod) + ' (' + escapeHtml(paymentDetail) + ')</p>' +
+      '<h4 style="margin:16px 0 8px;color:var(--green);">Order Status</h4>' +
+      stepperHtml +
+      '<h4 style="margin:16px 0 8px;color:var(--green);">Items</h4>' +
+      '<table class="checkout-cart-table">' +
+        '<thead><tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr></thead>' +
+        '<tbody>' + itemRows + '</tbody>' +
+      '</table>' +
+      '<div class="checkout-fee-summary" style="margin-top:12px;">' +
+        '<div class="fee-row"><span>Subtotal</span><span>' + formatKES(totals.subtotal) + '</span></div>' +
+        '<div class="fee-row"><span>Delivery</span><span>' + (totals.delivery === 0 ? '🆓 Free' : formatKES(totals.delivery)) + '</span></div>' +
+        (totals.discount > 0 ? '<div class="fee-row discount-row"><span>Promo discount</span><span>−' + formatKES(totals.discount) + '</span></div>' : '') +
+        '<div class="fee-row grand-total"><span>Grand Total</span><span>' + formatKES(totals.grand) + '</span></div>' +
+      '</div>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;">' +
+        '<button type="button" class="btn-continue-shopping" id="btn-continue-shopping">🛍️ Continue Shopping</button>' +
+        '<button type="button" class="btn-submit" id="btn-step3-print" style="background:#1565c0;">🖨️ Print Receipt</button>' +
+      '</div>' +
+      '<p style="font-size:0.8rem;color:var(--muted);margin-top:12px;">Expected delivery: within 24 hours. hello@farmfresh.co.ke | +254 712 345 678</p>' +
+    '</div>';
+
+  var continueBtn = document.getElementById('btn-continue-shopping');
+  if (continueBtn) {
+    continueBtn.onclick = function() {
+      if (checkoutFormWrapper) checkoutFormWrapper.hidden = true;
+      wizardPromoApplied = false;
+      var productsSection = document.getElementById('products');
+      if (productsSection) productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+  }
+  var printBtn = document.getElementById('btn-step3-print');
+  if (printBtn) {
+    printBtn.onclick = function() {
+      var existingPrint = document.getElementById('btn-print-receipt');
+      if (existingPrint) existingPrint.click();
+      else window.print();
+    };
+  }
 }
 
 // ===== Review Form =====
@@ -773,6 +1251,113 @@ if (btnTrackOrder) {
       if (e.key === 'Enter') btnTrackOrder.click();
     });
   }
+}
+
+// ===== Farmer Rating Modal =====
+function openRatingModal(farmerId) {
+  var farmers = getStore('ff_farmers');
+  var farmer = farmers.find(function(f) { return f.id === farmerId; });
+  if (!farmer) return;
+
+  var modal = document.getElementById('farmer-rating-modal');
+  var title = document.getElementById('rating-modal-farmer-name');
+  var sliders = document.getElementById('rating-modal-sliders');
+  if (!modal || !title || !sliders) return;
+
+  title.textContent = 'Rate ' + farmer.name;
+  modal.dataset.farmerId = farmerId;
+
+  var metrics = [
+    { key: 'freshness', label: 'Freshness', desc: 'Produce freshness on arrival' },
+    { key: 'delivery', label: 'Delivery', desc: 'Punctuality & reliability' },
+    { key: 'packaging', label: 'Packaging', desc: 'Quality & sustainability' },
+    { key: 'communication', label: 'Communication', desc: 'Responsiveness to queries' },
+    { key: 'value', label: 'Value', desc: 'Price-to-quality ratio' },
+    { key: 'consistency', label: 'Consistency', desc: 'Consistent quality order-to-order' }
+  ];
+
+  sliders.innerHTML = metrics.map(function(m) {
+    return '<div class="rating-slider-row">' +
+      '<label for="rate-' + m.key + '" class="rating-slider-label">' +
+        '<strong>' + escapeHtml(m.label) + '</strong>' +
+        '<small>' + escapeHtml(m.desc) + '</small>' +
+      '</label>' +
+      '<div class="rating-slider-control">' +
+        '<input type="range" id="rate-' + m.key + '" name="rate-' + m.key + '" ' +
+          'min="1" max="5" step="0.5" value="3" ' +
+          'aria-label="' + escapeHtml(m.label) + ' rating" ' +
+          'aria-valuemin="1" aria-valuemax="5" aria-valuenow="3">' +
+        '<span class="slider-value" id="rate-' + m.key + '-val">3.0</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  sliders.querySelectorAll('input[type="range"]').forEach(function(slider) {
+    var valSpan = document.getElementById(slider.id + '-val');
+    slider.addEventListener('input', function() {
+      if (valSpan) valSpan.textContent = parseFloat(slider.value).toFixed(1);
+      slider.setAttribute('aria-valuenow', slider.value);
+    });
+  });
+
+  modal.hidden = false;
+  var box = modal.querySelector('.rating-modal-box');
+  if (box) box.focus();
+  trapFocus(modal);
+}
+
+function closeRatingModal() {
+  var modal = document.getElementById('farmer-rating-modal');
+  if (modal) modal.hidden = true;
+}
+
+function submitFarmerRating() {
+  var modal = document.getElementById('farmer-rating-modal');
+  if (!modal) return;
+  var farmerId = modal.dataset.farmerId;
+  var farmers = getStore('ff_farmers');
+  var farmer = farmers.find(function(f) { return f.id === farmerId; });
+  if (!farmer) return;
+
+  var metrics = ['freshness', 'delivery', 'packaging', 'communication', 'value', 'consistency'];
+  var newScores = {};
+  metrics.forEach(function(m) {
+    var slider = document.getElementById('rate-' + m);
+    newScores[m] = slider ? parseFloat(slider.value) : 3;
+  });
+
+  var existingRatings = farmer.ratings || {};
+  var n = farmer.totalReviews || 0;
+  var updatedRatings = {};
+  metrics.forEach(function(m) {
+    var existing = existingRatings[m] || 0;
+    updatedRatings[m] = Math.round(((existing * n + newScores[m]) / (n + 1)) * 10) / 10;
+  });
+  var sum = metrics.reduce(function(acc, m) { return acc + updatedRatings[m]; }, 0);
+  updatedRatings.overall = Math.round((sum / metrics.length) * 10) / 10;
+
+  farmer.ratings = updatedRatings;
+  farmer.totalReviews = n + 1;
+  setStore('ff_farmers', farmers);
+  closeRatingModal();
+  renderFarmers();
+  showToast('✅ Rating submitted for ' + farmer.name);
+}
+
+function trapFocus(element) {
+  var focusable = element.querySelectorAll('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  if (!focusable.length) return;
+  var first = focusable[0];
+  var last = focusable[focusable.length - 1];
+  element.addEventListener('keydown', function handler(e) {
+    if (e.key === 'Escape') { closeRatingModal(); element.removeEventListener('keydown', handler); return; }
+    if (e.key !== 'Tab') return;
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
 }
 
 // ===== Init: Seed → Render → Attach Listeners =====

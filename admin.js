@@ -62,8 +62,20 @@ function seedData() {
   }
   if (!localStorage.getItem('ff_farmers')) {
     setStore('ff_farmers', [
-      { id: 'f1', name: 'John Kamau', location: 'Nakuru, Kenya', bio: 'John has been farming organically for over 15 years, specialising in tomatoes and leafy greens grown without pesticides.', phone: '0711111111', email: 'john@farmfresh.co.ke' },
-      { id: 'f2', name: 'Amina Wanjiru', location: 'Kiambu, Kenya', bio: 'Amina runs a family farm famous for its award-winning spinach and zucchini, using traditional irrigation methods.', phone: '0722222222', email: 'amina@farmfresh.co.ke' }
+      {
+        id: 'f1', name: 'John Kamau', location: 'Nakuru, Kenya',
+        bio: 'John has been farming organically for over 15 years, specialising in tomatoes and leafy greens grown without pesticides.',
+        phone: '0711111111', email: 'john@farmfresh.co.ke',
+        ratings: { overall: 4.7, freshness: 4.8, delivery: 4.6, packaging: 4.5, communication: 4.9, value: 4.7, consistency: 4.6 },
+        totalReviews: 23, badges: ['Top Seller', 'Eco Packaging']
+      },
+      {
+        id: 'f2', name: 'Amina Wanjiru', location: 'Kiambu, Kenya',
+        bio: 'Amina runs a family farm famous for its award-winning spinach and zucchini, using traditional irrigation methods.',
+        phone: '0722222222', email: 'amina@farmfresh.co.ke',
+        ratings: { overall: 4.5, freshness: 4.6, delivery: 4.4, packaging: 4.7, communication: 4.3, value: 4.5, consistency: 4.4 },
+        totalReviews: 18, badges: ['Eco Packaging', 'Best Value']
+      }
     ]);
   }
   if (!localStorage.getItem('ff_users')) {
@@ -379,7 +391,7 @@ function renderFarmers() {
   var orders = getStore('ff_orders');
   var tbody = document.getElementById('farmers-body');
   if (farmers.length === 0) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No farmers yet.</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="9">No farmers yet.</td></tr>';
     return;
   }
   tbody.innerHTML = farmers.map(function (f) {
@@ -397,6 +409,11 @@ function renderFarmers() {
       });
       if (hasItem) farmerOrderCount++;
     });
+    var overallNum = (f.ratings && typeof f.ratings.overall === 'number') ? f.ratings.overall : 0;
+    var overall = overallNum > 0 ? overallNum.toFixed(1) : '—';
+    var reviews = f.totalReviews || 0;
+    var badgesArr = Array.isArray(f.badges) ? f.badges : [];
+    var badgesStr = badgesArr.length ? escapeHtml(badgesArr.join(', ')) : '—';
     return '<tr>' +
       '<td>' + escapeHtml(f.name) + '</td>' +
       '<td>' + escapeHtml(f.location) + '</td>' +
@@ -406,9 +423,13 @@ function renderFarmers() {
         '<span class="badge badge-confirmed">' + farmerOrderCount + ' orders</span> ' +
         '<span class="badge badge-delivered">KES ' + farmerRevenue.toLocaleString() + '</span>' +
       '</td>' +
+      '<td>' + escapeHtml(String(overall)) + '</td>' +
+      '<td>' + escapeHtml(String(reviews)) + '</td>' +
+      '<td><small>' + badgesStr + '</small></td>' +
       '<td><div class="btn-actions">' +
         '<button class="btn-edit" onclick="openFarmerModal(' + safeId + ')">Edit</button>' +
         '<button class="btn-danger" onclick="deleteFarmer(' + safeId + ')">Delete</button>' +
+        '<button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;" onclick="resetFarmerRatings(' + safeId + ')">Reset Ratings</button>' +
       '</div></td>' +
       '</tr>';
   }).join('');
@@ -431,6 +452,10 @@ function openFarmerModal(id) {
       form.elements['f-bio'].value = f.bio;
       if (form.elements['f-phone']) form.elements['f-phone'].value = f.phone || '';
       if (form.elements['f-email']) form.elements['f-email'].value = f.email || '';
+      if (form.elements['f-badges']) {
+        var badgesArr = Array.isArray(f.badges) ? f.badges : [];
+        form.elements['f-badges'].value = badgesArr.join(', ');
+      }
     }
   } else {
     titleEl.textContent = 'Add Farmer';
@@ -451,6 +476,8 @@ function saveFarmer(e) {
   var bio = form.elements['f-bio'].value.trim();
   var phone = form.elements['f-phone'] ? form.elements['f-phone'].value.trim() : '';
   var email = form.elements['f-email'] ? form.elements['f-email'].value.trim() : '';
+  var badgesRaw = form.elements['f-badges'] ? form.elements['f-badges'].value.trim() : '';
+  var badges = badgesRaw ? badgesRaw.split(',').map(function(b) { return b.trim(); }).filter(function(b) { return b; }) : [];
 
   var farmers = getStore('ff_farmers');
   if (!name || !location || !bio) {
@@ -465,13 +492,27 @@ function saveFarmer(e) {
       farmer.bio = bio;
       farmer.phone = phone;
       farmer.email = email;
+      farmer.badges = badges;
+      // Preserve existing ratings and totalReviews
     }
   } else {
-    farmers.push({ id: 'f' + Date.now(), name: name, location: location, bio: bio, phone: phone, email: email });
+    farmers.push({ id: 'f' + Date.now(), name: name, location: location, bio: bio, phone: phone, email: email, badges: badges, ratings: { overall: 0, freshness: 0, delivery: 0, packaging: 0, communication: 0, value: 0, consistency: 0 }, totalReviews: 0 });
   }
   setStore('ff_farmers', farmers);
   closeFarmerModal();
   renderFarmers();
+}
+
+function resetFarmerRatings(id) {
+  if (!confirm('Reset all ratings for this farmer to zero?')) return;
+  var farmers = getStore('ff_farmers');
+  var farmer = farmers.find(function (f) { return f.id === id; });
+  if (farmer) {
+    farmer.ratings = { overall: 0, freshness: 0, delivery: 0, packaging: 0, communication: 0, value: 0, consistency: 0 };
+    farmer.totalReviews = 0;
+    setStore('ff_farmers', farmers);
+    renderFarmers();
+  }
 }
 
 function deleteFarmer(id) {

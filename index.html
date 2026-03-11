@@ -162,34 +162,175 @@
         <button type="button" class="checkout">Checkout</button>
 
         <div id="checkout-form-wrapper" class="checkout-form-wrapper" hidden>
+          <!-- Progress Steps -->
           <ol class="checkout-steps" aria-label="Checkout progress">
-            <li class="step">1. Cart</li>
-            <li class="step active">2. Details</li>
-            <li class="step">3. Confirmation</li>
+            <li class="step" id="step-indicator-1" aria-current="step">1. Cart</li>
+            <li class="step" id="step-indicator-2">2. Payment</li>
+            <li class="step" id="step-indicator-3">3. Confirmation</li>
           </ol>
-          <h3>Payment Details</h3>
-          <p class="guest-checkout-note">No account needed — checkout as a guest</p>
-          <form id="checkout-form" novalidate>
-            <div class="form-group">
-              <label for="checkout-name">Full Name</label>
-              <input type="text" id="checkout-name" placeholder="Full name" required autocomplete="name">
+
+          <!-- ===== Step 1: Cart Review ===== -->
+          <div id="checkout-step-1" class="checkout-step">
+            <h3>Cart Review</h3>
+            <p class="guest-checkout-note">No account needed — checkout as a guest</p>
+            <div id="checkout-cart-table-wrapper"><!-- Injected by JS --></div>
+            <div class="checkout-fee-summary" id="checkout-fee-summary"></div>
+            <div class="promo-row">
+              <label for="promo-code-input">Promo Code</label>
+              <div class="promo-input-group">
+                <input type="text" id="promo-code-input" placeholder="e.g. FRESH10" autocomplete="off" aria-describedby="promo-msg">
+                <button type="button" id="btn-apply-promo" class="btn-secondary">Apply</button>
+              </div>
+              <span id="promo-msg" class="promo-msg" aria-live="polite"></span>
             </div>
-            <div class="form-group">
-              <label for="checkout-phone">Phone Number</label>
-              <input type="tel" id="checkout-phone" autocomplete="tel" placeholder="e.g. 0712 345 678" required>
+            <!-- Delivery details collected here -->
+            <div class="delivery-details-form">
+              <h4>Delivery Details</h4>
+              <div class="form-group">
+                <label for="checkout-name">Full Name</label>
+                <input type="text" id="checkout-name" placeholder="Full name" required autocomplete="name">
+              </div>
+              <div class="form-group">
+                <label for="checkout-phone">Phone Number</label>
+                <input type="tel" id="checkout-phone" autocomplete="tel" placeholder="e.g. 0712 345 678" required>
+              </div>
+              <div class="form-group">
+                <label for="checkout-address">Delivery Address</label>
+                <input type="text" id="checkout-address" autocomplete="street-address" placeholder="e.g. 14 Moi Avenue, Nairobi" required>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="checkout-address">Delivery Address</label>
-              <input type="text" id="checkout-address" autocomplete="street-address" placeholder="e.g. 14 Moi Avenue, Nairobi" required>
-            </div>
-            <div class="order-summary-preview" id="order-summary-preview"></div>
             <div class="trust-badges">
               <span>🔒 SSL Secured</span>
               <span>🚚 Delivery within 24h</span>
               <span>✅ No hidden fees</span>
             </div>
-            <button type="submit" class="btn-submit">Confirm Order</button>
-          </form>
+            <button type="button" id="btn-step1-next" class="btn-submit" disabled>Proceed to Payment</button>
+          </div>
+
+          <!-- ===== Step 2: Payment Method ===== -->
+          <div id="checkout-step-2" class="checkout-step" hidden>
+            <h3>Choose Payment Method</h3>
+            <fieldset class="payment-method-fieldset">
+              <legend>Payment Method</legend>
+              <div class="payment-method-cards">
+
+                <!-- M-Pesa -->
+                <label class="payment-method-card selected" for="pay-mpesa">
+                  <input type="radio" id="pay-mpesa" name="payment-method" value="mpesa" checked>
+                  <div class="payment-method-card-inner">
+                    <span class="payment-logo mpesa-logo"><span class="mpesa-m">M</span>-<span class="mpesa-pesa">PESA</span></span>
+                    <span class="payment-method-name">M-Pesa</span>
+                  </div>
+                </label>
+
+                <!-- Card -->
+                <label class="payment-method-card" for="pay-card">
+                  <input type="radio" id="pay-card" name="payment-method" value="card">
+                  <div class="payment-method-card-inner">
+                    <span class="payment-logo card-logo">💳</span>
+                    <span class="payment-method-name">Card</span>
+                  </div>
+                </label>
+
+                <!-- Crypto -->
+                <label class="payment-method-card" for="pay-crypto">
+                  <input type="radio" id="pay-crypto" name="payment-method" value="crypto">
+                  <div class="payment-method-card-inner">
+                    <span class="payment-logo crypto-logo">₿</span>
+                    <span class="payment-method-name">Crypto</span>
+                  </div>
+                </label>
+
+              </div>
+            </fieldset>
+
+            <!-- M-Pesa Panel -->
+            <div id="panel-mpesa" class="payment-panel">
+              <div class="mpesa-header">
+                <span class="mpesa-wordmark"><span class="mpesa-m">M</span>-<span class="mpesa-pesa">PESA</span></span>
+                <small>Lipa na M-Pesa</small>
+              </div>
+              <div class="form-group">
+                <label for="mpesa-phone">M-Pesa Phone Number</label>
+                <input type="tel" id="mpesa-phone" autocomplete="tel" placeholder="0712 345 678" inputmode="numeric" aria-describedby="mpesa-phone-error">
+                <span id="mpesa-phone-error" class="field-error" role="alert" style="display:none"></span>
+              </div>
+              <div id="mpesa-spinner-msg" class="payment-spinner-msg" hidden>
+                <div class="spinner" aria-label="Processing…"></div>
+                <p id="mpesa-status-text">STK Push sent — Enter your M-Pesa PIN on your phone</p>
+              </div>
+              <button type="button" id="btn-pay-mpesa" class="btn-submit mpesa-btn">Pay with M-Pesa</button>
+            </div>
+
+            <!-- Card Panel -->
+            <div id="panel-card" class="payment-panel" hidden>
+              <div class="trust-signals">
+                <span>🔒 SSL Secured</span>
+                <span>✅ Verified by Visa</span>
+                <span>✅ Mastercard SecureCode</span>
+              </div>
+              <div class="form-group">
+                <label for="card-number">Card Number <span id="card-type-icon" class="card-type-icon"></span></label>
+                <input type="text" id="card-number" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456" maxlength="19" aria-describedby="card-number-error">
+                <span id="card-number-error" class="field-error" role="alert"></span>
+              </div>
+              <div class="form-group">
+                <label for="card-name">Cardholder Name</label>
+                <input type="text" id="card-name" autocomplete="cc-name" placeholder="Name on card" aria-describedby="card-name-error">
+                <span id="card-name-error" class="field-error" role="alert"></span>
+              </div>
+              <div class="form-row-2col">
+                <div class="form-group">
+                  <label for="card-expiry">Expiry Date</label>
+                  <input type="text" id="card-expiry" inputmode="numeric" autocomplete="cc-exp" placeholder="MM / YY" maxlength="7" aria-describedby="card-expiry-error">
+                  <span id="card-expiry-error" class="field-error" role="alert"></span>
+                </div>
+                <div class="form-group">
+                  <label for="card-cvv">
+                    CVV
+                    <button type="button" class="cvv-tooltip-btn" aria-label="CVV help" title="3 digits on back of card (4 for Amex)">?</button>
+                  </label>
+                  <input type="text" id="card-cvv" inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4" aria-describedby="card-cvv-error">
+                  <span id="card-cvv-error" class="field-error" role="alert"></span>
+                </div>
+              </div>
+              <div id="card-spinner-msg" class="payment-spinner-msg" hidden>
+                <div class="spinner" aria-label="Processing…"></div>
+                <p>Processing your card payment…</p>
+              </div>
+              <button type="button" id="btn-pay-card" class="btn-submit">Pay Securely 🔒</button>
+            </div>
+
+            <!-- Crypto Panel -->
+            <div id="panel-crypto" class="payment-panel crypto-panel" hidden>
+              <fieldset class="coin-selector-fieldset">
+                <legend>Select Coin</legend>
+                <label class="coin-radio-label"><input type="radio" name="crypto-coin" value="usdt" checked> USDT (TRC-20)</label>
+                <label class="coin-radio-label"><input type="radio" name="crypto-coin" value="btc"> BTC</label>
+              </fieldset>
+              <div class="crypto-amount-display" id="crypto-amount-display"></div>
+              <div class="form-group">
+                <label for="crypto-address">Wallet Address</label>
+                <div class="crypto-address-row">
+                  <input type="text" id="crypto-address" class="crypto-address-input" readonly aria-label="Wallet address">
+                  <button type="button" id="btn-copy-address" class="btn-secondary btn-copy">📋 Copy</button>
+                </div>
+              </div>
+              <div class="qr-placeholder" aria-label="QR code placeholder">
+                <div class="qr-grid" id="qr-grid"></div>
+                <small>Scan with your wallet app</small>
+              </div>
+              <p class="crypto-note" id="crypto-note"></p>
+              <button type="button" id="btn-pay-crypto" class="btn-submit crypto-btn">I've Sent the Payment ✓</button>
+            </div>
+
+            <button type="button" id="btn-step2-back" class="btn-back">← Back to Cart</button>
+          </div>
+
+          <!-- ===== Step 3: Confirmation ===== -->
+          <div id="checkout-step-3" class="checkout-step" hidden>
+            <!-- Receipt injected here by JS -->
+          </div>
         </div>
 
         <div class="payment-methods">
@@ -259,6 +400,23 @@
       🛒 <span class="fab-cart-count" id="fab-cart-count"></span>
     </a>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <!-- ===== Farmer Rating Modal ===== -->
+    <div id="farmer-rating-modal" class="rating-modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="rating-modal-farmer-name">
+      <div class="rating-modal-box" tabindex="-1">
+        <div class="rating-modal-header">
+          <h3 id="rating-modal-farmer-name">Rate Farmer</h3>
+          <button type="button" class="rating-modal-close" onclick="closeRatingModal()" aria-label="Close rating modal">×</button>
+        </div>
+        <p class="rating-modal-subtitle">Drag each slider to rate (1 = poor, 5 = excellent)</p>
+        <div id="rating-modal-sliders"></div>
+        <div class="rating-modal-footer">
+          <button type="button" class="btn-submit" onclick="submitFarmerRating()">Submit Rating</button>
+          <button type="button" class="btn-back" onclick="closeRatingModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <script src="script.js"></script>
   </body>
 </html>
