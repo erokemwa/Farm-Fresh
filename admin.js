@@ -1,8 +1,5 @@
 /* ===== Admin Dashboard JavaScript ===== */
 
-const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'farmfresh2026'; // TODO: replace with server-side auth
-
 /* ===== Helpers ===== */
 function escapeHtml(str) {
   return String(str)
@@ -62,39 +59,17 @@ function isLoggedIn() {
   return localStorage.getItem('adminLoggedIn') === 'true';
 }
 
-function showLogin() {
-  document.getElementById('login-gate').hidden = false;
-  document.getElementById('admin-app').hidden = true;
-}
-
-function showDashboard() {
-  document.getElementById('login-gate').hidden = true;
-  document.getElementById('admin-app').hidden = false;
-  renderOverview();
-}
-
-function handleLogin(e) {
-  e.preventDefault();
-  const username = document.getElementById('login-username').value.trim();
-  const password = document.getElementById('login-password').value;
-  const errorEl = document.getElementById('login-error');
-
-  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-    errorEl.textContent = '';
-    localStorage.setItem('adminLoggedIn', 'true');
-    showDashboard();
-  } else {
-    errorEl.textContent = 'Incorrect username or password.';
-  }
-}
-
 function handleLogout() {
   localStorage.removeItem('adminLoggedIn');
-  showLogin();
+  window.location.replace('admin-login.html');
 }
 
 /* ===== Tab Switching ===== */
 function switchTab(tabId) {
+  var tabTitles = { overview: 'Overview', orders: 'Orders', products: 'Products', farmers: 'Farmers', reviews: 'Reviews' };
+  var titleEl = document.getElementById('topbar-section-title');
+  if (titleEl) titleEl.textContent = tabTitles[tabId] || tabId;
+
   document.querySelectorAll('.nav-link').forEach(function (link) {
     link.classList.toggle('active', link.dataset.tab === tabId);
   });
@@ -441,16 +416,14 @@ function deleteReview(id) {
 
 /* ===== Init ===== */
 document.addEventListener('DOMContentLoaded', function () {
-  seedData();
-
-  if (isLoggedIn()) {
-    showDashboard();
-  } else {
-    showLogin();
+  // Auth guard — redirect to login if not authenticated
+  if (!isLoggedIn()) {
+    window.location.replace('admin-login.html');
+    return;
   }
 
-  /* Login form */
-  document.getElementById('login-form').addEventListener('submit', handleLogin);
+  seedData();
+  renderOverview();
 
   /* Logout button */
   document.getElementById('btn-logout').addEventListener('click', handleLogout);
