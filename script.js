@@ -235,9 +235,15 @@ filterButtons.forEach(btn => {
     filterButtons.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     const filter = btn.dataset.filter;
+    const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
     document.querySelectorAll('.product-list ul li').forEach(li => {
-      const cat = li.dataset.category || 'all';
-      li.style.display = (filter === 'all' || cat === filter) ? '' : 'none';
+      const name = (li.dataset.name || '').toLowerCase();
+      const farmer = (li.dataset.farmer || '').toLowerCase();
+      const availability = (li.dataset.availability || '').toLowerCase();
+      const cat = li.dataset.category || '';
+      const matchesFilter = filter === 'all' || cat === filter;
+      const matchesSearch = !query || name.includes(query) || farmer.includes(query) || availability.includes(query);
+      li.style.display = (matchesFilter && matchesSearch) ? '' : 'none';
     });
   });
 });

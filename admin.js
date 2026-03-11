@@ -1,5 +1,8 @@
 /* ===== Admin Dashboard JavaScript ===== */
 
+const ADMIN_USERNAME = 'admin';
+const ADMIN_PASSWORD = 'farmfresh2026'; // TODO: replace with server-side auth
+
 /* ===== Helpers ===== */
 function escapeHtml(str) {
   return String(str)
@@ -76,7 +79,7 @@ function handleLogin(e) {
   const password = document.getElementById('login-password').value;
   const errorEl = document.getElementById('login-error');
 
-  if (username === 'admin' && password === 'farmfresh2026') {
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
     errorEl.textContent = '';
     localStorage.setItem('adminLoggedIn', 'true');
     showDashboard();
@@ -118,7 +121,7 @@ function renderOverview() {
   document.getElementById('stat-products').textContent = products.length;
   document.getElementById('stat-farmers').textContent = farmers.length;
 
-  var recent = orders.slice().sort(function (a, b) { return b.date > a.date ? 1 : -1; }).slice(0, 5);
+  var recent = orders.slice().sort(function (a, b) { return b.date < a.date ? -1 : b.date > a.date ? 1 : 0; }).slice(0, 5);
   var tbody = document.getElementById('recent-orders-body');
   if (recent.length === 0) {
     tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No orders yet.</td></tr>';
@@ -148,7 +151,7 @@ function renderOrders() {
   var orders = getStore('ff_orders');
   var tbody = document.getElementById('orders-body');
   if (orders.length === 0) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No orders found.</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="9">No orders found.</td></tr>';
     return;
   }
   tbody.innerHTML = orders.map(function (o) {
@@ -280,6 +283,10 @@ function saveProduct(e) {
   var unit = form.elements['p-unit'].value.trim();
 
   var products = getStore('ff_products');
+  if (!name || !farmer || !price || !unit) {
+    alert('Please fill in all required fields: Name, Farmer, Price, and Unit.');
+    return;
+  }
   if (productEditId) {
     var product = products.find(function (p) { return p.id === productEditId; });
     if (product) {
@@ -364,6 +371,10 @@ function saveFarmer(e) {
   var bio = form.elements['f-bio'].value.trim();
 
   var farmers = getStore('ff_farmers');
+  if (!name || !location || !bio) {
+    alert('Please fill in all required fields: Name, Location, and Bio.');
+    return;
+  }
   if (farmerEditId) {
     var farmer = farmers.find(function (f) { return f.id === farmerEditId; });
     if (farmer) {

@@ -19,7 +19,9 @@ body { font-family: 'Segoe UI', Arial, sans-serif; color: var(--text); backgroun
 .login-box h1 { font-size: 1.8rem; color: var(--green); margin-bottom: 4px; }
 .login-box p { color: var(--muted); margin-bottom: 24px; }
 .login-box label { display: block; text-align: left; font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; }
+.login-box input[type="text"],
 .login-box input[type="password"] { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 1rem; outline: none; margin-bottom: 12px; transition: border-color 0.2s; }
+.login-box input[type="text"]:focus,
 .login-box input[type="password"]:focus { border-color: var(--green); }
 .login-error { color: var(--red); font-size: 0.85rem; margin-bottom: 10px; }
 .admin-app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
