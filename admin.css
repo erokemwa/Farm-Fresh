@@ -614,6 +614,129 @@ tbody tr:hover {
   letter-spacing: 1px;
 }
 
+/* ===== Status Badge: Dispatched ===== */
+.badge-dispatched {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+/* ===== Shipping Tab ===== */
+.admin-filter-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.filter-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.admin-select {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  outline: none;
+  background: #fff;
+  font-family: inherit;
+}
+
+.admin-select:focus {
+  border-color: var(--green);
+}
+
+.shipping-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.shipping-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  border: 1px solid var(--border);
+}
+
+.shipping-card h4 {
+  color: var(--green);
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.shipping-card .shipping-customer {
+  font-size: 0.85rem;
+  color: #555;
+  margin: 0 0 12px;
+}
+
+.shipping-steps {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  margin: 12px 0;
+  position: relative;
+}
+
+.shipping-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  z-index: 1;
+  border: 3px solid #e0e0e0;
+}
+
+.step-circle.done {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.step-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 5px;
+  text-align: center;
+  color: #777;
+}
+
+.step-label.done {
+  color: var(--green);
+}
+
+.step-connector {
+  flex: 1;
+  height: 3px;
+  background: #e0e0e0;
+  margin-top: 16px;
+}
+
+.step-connector.done {
+  background: var(--green);
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 900px) {
   .stats-grid {

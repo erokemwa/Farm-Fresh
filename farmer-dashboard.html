@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Farm Fresh Farmer Dashboard — manage your produce, track orders and earnings.">
+    <title>Farm Fresh — Farmer Dashboard</title>
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="farmer-dashboard.css">
+  </head>
+  <body>
+
+    <!-- ===== Farmer Login Overlay ===== -->
+    <div id="farmer-login-overlay" class="farmer-login-overlay hidden">
+      <div class="farmer-login-card">
+        <h2>🌿 Farmer Portal</h2>
+        <p class="farmer-login-sub">Select your name to continue</p>
+        <div class="form-group">
+          <label for="farmer-select">Your Name</label>
+          <select id="farmer-select" class="farmer-select"></select>
+        </div>
+        <button id="btn-farmer-continue" class="btn-primary farmer-continue-btn" type="button">Continue</button>
+      </div>
+    </div>
+
+    <!-- ===== Dashboard App ===== -->
+    <div id="farmer-app" class="admin-app">
+
+      <!-- Sidebar -->
+      <aside class="sidebar" aria-label="Farmer sidebar navigation">
+        <div class="sidebar-brand">
+          <a href="index.html" class="sidebar-logo-link">🌿 Farm Fresh</a>
+          <span>Farmer Dashboard</span>
+        </div>
+        <nav class="sidebar-nav" aria-label="Dashboard sections">
+          <a class="nav-link active" href="javascript:void(0)" data-tab="overview" role="button" tabindex="0">
+            <span class="nav-icon">📊</span> Overview
+          </a>
+          <a class="nav-link" href="javascript:void(0)" data-tab="products" role="button" tabindex="0">
+            <span class="nav-icon">🥦</span> My Products
+          </a>
+          <a class="nav-link" href="javascript:void(0)" data-tab="orders" role="button" tabindex="0">
+            <span class="nav-icon">🛍️</span> My Orders
+          </a>
+          <a class="nav-link" href="javascript:void(0)" data-tab="shipping" role="button" tabindex="0">
+            <span class="nav-icon">🚚</span> Shipping
+          </a>
+          <a class="nav-link" href="javascript:void(0)" data-tab="earnings" role="button" tabindex="0">
+            <span class="nav-icon">💰</span> Earnings
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Right-hand column: topbar + main content -->
+      <div class="admin-content">
+
+        <!-- Topbar -->
+        <header class="admin-topbar">
+          <span class="topbar-wordmark">
+            <a href="index.html" class="topbar-logo-link">🌿 <strong>Farm Fresh</strong></a>
+          </span>
+          <span id="topbar-section-title" class="topbar-section-title">Overview</span>
+          <div class="topbar-actions">
+            <span id="topbar-farmer-name" class="topbar-farmer-name">—</span>
+            <button id="btn-farmer-logout" class="btn-logout" type="button">Log Out</button>
+          </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+
+        <!-- ===== Overview Tab ===== -->
+        <section id="tab-overview" class="admin-section active">
+          <h2>Overview</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value" id="stat-my-products">—</div>
+              <div class="stat-label">My Products</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="stat-active-orders">—</div>
+              <div class="stat-label">Active Orders</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="stat-delivered">—</div>
+              <div class="stat-label">Total Delivered</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="stat-earnings">—</div>
+              <div class="stat-label">Total Earnings (KES)</div>
+            </div>
+          </div>
+
+          <h3>Recent Activity (last 5 orders)</h3>
+          <div class="table-wrapper">
+            <table aria-label="Recent activity">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="recent-activity-body">
+                <tr class="empty-row"><td colspan="6">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== My Products Tab ===== -->
+        <section id="tab-products" class="admin-section">
+          <div class="section-header">
+            <h2>My Products</h2>
+            <button id="btn-add-my-product" class="btn-primary" type="button">+ Add Product</button>
+          </div>
+
+          <!-- Add Product Form (inline, hidden by default) -->
+          <div id="add-product-form-wrapper" class="inline-form-wrapper" style="display:none;">
+            <h3>Add New Product</h3>
+            <form id="add-product-form" novalidate>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="np-name">Product Name</label>
+                  <input type="text" id="np-name" placeholder="e.g. Tomatoes" required>
+                </div>
+                <div class="form-group">
+                  <label for="np-category">Category</label>
+                  <select id="np-category">
+                    <option value="vegetables">Vegetables</option>
+                    <option value="greens">Greens</option>
+                    <option value="fruits">Fruits</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="np-unit">Unit</label>
+                  <input type="text" id="np-unit" placeholder="e.g. per kg" required>
+                </div>
+                <div class="form-group">
+                  <label for="np-price">Price (KES)</label>
+                  <input type="number" id="np-price" min="0" step="1" placeholder="100" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="np-orig-price">Original Price (optional)</label>
+                  <input type="number" id="np-orig-price" min="0" step="1" placeholder="120">
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn-primary">Save Product</button>
+                <button type="button" id="btn-cancel-add-product" class="btn-danger">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="table-wrapper">
+            <table aria-label="My products">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Unit</th>
+                  <th>Price</th>
+                  <th>Orig. Price</th>
+                  <th>Available</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="my-products-body">
+                <tr class="empty-row"><td colspan="7">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== My Orders Tab ===== -->
+        <section id="tab-orders" class="admin-section">
+          <div class="section-header">
+            <h2>My Orders</h2>
+            <select id="orders-status-filter" class="admin-select">
+              <option value="all">All Statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Dispatched">Dispatched</option>
+              <option value="Delivered">Delivered</option>
+            </select>
+          </div>
+          <div class="table-wrapper">
+            <table aria-label="My orders">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>Address</th>
+                  <th>Items (mine)</th>
+                  <th>Subtotal</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="my-orders-body">
+                <tr class="empty-row"><td colspan="8">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== Shipping Tab ===== -->
+        <section id="tab-shipping" class="admin-section">
+          <h2>Shipping Tracker</h2>
+          <p style="font-size:0.9rem;color:#666;margin-bottom:16px;">Showing active (non-Delivered) orders containing your products. Status is managed by the admin.</p>
+          <div id="farmer-shipping-cards" class="shipping-cards-grid"></div>
+        </section>
+
+        <!-- ===== Earnings Tab ===== -->
+        <section id="tab-earnings" class="admin-section">
+          <h2>Earnings</h2>
+          <div class="stats-grid" id="earnings-stats-grid">
+            <div class="stat-card">
+              <div class="stat-value" id="earn-total-revenue">—</div>
+              <div class="stat-label">Total Revenue</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="earn-confirmed-revenue">—</div>
+              <div class="stat-label">Confirmed Revenue</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="earn-delivered-revenue">—</div>
+              <div class="stat-label">Delivered Revenue</div>
+            </div>
+          </div>
+
+          <h3>Delivered Orders</h3>
+          <div class="table-wrapper">
+            <table aria-label="Delivered orders">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Items</th>
+                  <th>Subtotal</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="delivered-orders-body">
+                <tr class="empty-row"><td colspan="4">No delivered orders yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Monthly Breakdown</h3>
+          <div id="monthly-chart" class="monthly-chart"></div>
+        </section>
+
+        </main>
+      </div>
+    </div>
+
+    <script src="farmer-dashboard.js"></script>
+  </body>
+</html>

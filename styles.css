@@ -1244,8 +1244,13 @@ footer {
 .receipt-header {
   text-align: center;
   margin-bottom: 12px;
-  border-bottom: 2px dashed var(--green);
   padding-bottom: 10px;
+}
+
+.receipt-divider {
+  border: none;
+  border-top: 2px dashed var(--green);
+  margin: 8px 0;
 }
 
 .receipt-logo {
@@ -1264,6 +1269,13 @@ footer {
   margin: 4px 0 0;
   font-size: 0.78rem;
   color: #555;
+}
+
+.receipt-customer {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #333;
 }
 
 .receipt-table {
@@ -1315,9 +1327,33 @@ footer {
   font-size: 0.8rem;
   color: var(--muted);
   margin: 8px 0 0;
-  border-top: 2px dashed var(--green);
-  padding-top: 8px;
 }
+
+.receipt-footer-note p {
+  margin: 3px 0;
+}
+
+/* ===== Receipt Shipping Status ===== */
+.receipt-shipping-status {
+  margin: 8px 0;
+  padding: 6px 0;
+  border-top: 1px dashed var(--border);
+  font-size: 0.88rem;
+}
+
+.receipt-status-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.receipt-badge-pending { background: #fff3e0; color: #b45309; }
+.receipt-badge-confirmed { background: #eff6ff; color: #1d4ed8; }
+.receipt-badge-dispatched { background: #f3e8ff; color: #7e22ce; }
+.receipt-badge-delivered { background: #dcfce7; color: #166534; }
 
 /* ===== Print Receipt Button ===== */
 .btn-print-receipt {
@@ -1339,15 +1375,147 @@ footer {
   background: #0d47a1;
 }
 
+/* ===== Shipping Tracker Steps ===== */
+.shipping-steps {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  margin: 20px 0;
+  position: relative;
+}
+
+.shipping-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--border);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  z-index: 1;
+  border: 3px solid var(--border);
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.step-circle.done {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.step-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 6px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.step-label.done {
+  color: var(--green);
+}
+
+.step-connector {
+  flex: 1;
+  height: 3px;
+  background: var(--border);
+  margin-top: 18px;
+  transition: background 0.3s;
+}
+
+.step-connector.done {
+  background: var(--green);
+}
+
+/* ===== Track Order Section ===== */
+.track-order-section {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  margin: 0 24px 24px;
+}
+
+.track-order-section h2 {
+  color: var(--green);
+  margin: 0 0 16px;
+  font-size: 1.3rem;
+}
+
+.track-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.track-form label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.track-form input[type="text"] {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.track-form input[type="text"]:focus {
+  border-color: var(--green);
+}
+
+.track-result {
+  margin-top: 8px;
+}
+
+.track-card {
+  background: var(--green-light);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  font-size: 0.92rem;
+}
+
+.track-card h3 {
+  color: var(--green);
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+}
+
+.track-error {
+  color: #c62828;
+  font-weight: 600;
+  padding: 10px 0;
+}
+
 /* ===== Print Media Query ===== */
 @media print {
   /* Hide everything except the receipt */
-  body > *:not(.cart-print-wrapper),
   .announcement-bar,
   header,
   .hero,
   main > .products-wrapper,
   #farmers,
+  #track-order,
   #contact,
   footer,
   .fab-cart,
