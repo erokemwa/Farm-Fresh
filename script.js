@@ -435,10 +435,7 @@ if (checkoutForm) {
     setTimeout(function () {
       cartItems = [];
       if (orderConfirmation) orderConfirmation.hidden = true;
-      var receiptBlockEl = document.getElementById('receipt-block');
-      if (receiptBlockEl) receiptBlockEl.hidden = true;
-      var btnPrint = document.getElementById('btn-print-receipt');
-      if (btnPrint) btnPrint.hidden = true;
+      // Do NOT hide receipt-block or btn-print-receipt here — user needs time to print
       cartList.style.display = '';
       if (totalLine) totalLine.style.display = '';
       checkoutForm.reset();
@@ -642,7 +639,15 @@ attachQtySteppers();
 // ===== Print Receipt Button =====
 var btnPrintReceiptEl = document.getElementById('btn-print-receipt');
 if (btnPrintReceiptEl) {
+  function afterPrint() {
+    var rb = document.getElementById('receipt-block');
+    if (rb) rb.hidden = true;
+    btnPrintReceiptEl.hidden = true;
+    window.removeEventListener('afterprint', afterPrint);
+  }
   btnPrintReceiptEl.addEventListener('click', function () {
     window.print();
+    // Hide receipt after the print dialog closes (afterprint event)
+    window.addEventListener('afterprint', afterPrint);
   });
 }
