@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Farm Fresh Admin Dashboard — manage orders, products, farmers and reviews.">
+    <title>Farm Fresh Admin</title>
+    <link rel="stylesheet" href="admin.css">
+  </head>
+  <body>
+
+    <!-- ===== Login Screen ===== -->
+    <div id="login-gate" class="login-gate">
+      <div class="login-box">
+        <div class="login-logo">🌿 Farm Fresh</div>
+        <p class="login-subtitle">Admin Dashboard</p>
+        <form id="login-form" novalidate>
+          <div class="form-group">
+            <label for="login-username">Username</label>
+            <input type="text" id="login-username" placeholder="Enter username" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" placeholder="Enter password" required autocomplete="current-password">
+          </div>
+          <p class="login-error" id="login-error" aria-live="polite"></p>
+          <button type="submit" class="btn-login">Log In</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== Dashboard App ===== -->
+    <div id="admin-app" class="admin-app" hidden>
+
+      <!-- Sidebar -->
+      <aside class="sidebar" aria-label="Admin sidebar navigation">
+        <div class="sidebar-brand">
+          🌿 Farm Fresh
+          <span>Admin Dashboard</span>
+        </div>
+        <nav class="sidebar-nav" aria-label="Dashboard sections">
+          <a class="nav-link active" data-tab="overview" role="button" tabindex="0">
+            <span class="nav-icon">📊</span> Overview
+          </a>
+          <a class="nav-link" data-tab="orders" role="button" tabindex="0">
+            <span class="nav-icon">🛍️</span> Orders
+          </a>
+          <a class="nav-link" data-tab="products" role="button" tabindex="0">
+            <span class="nav-icon">🥦</span> Products
+          </a>
+          <a class="nav-link" data-tab="farmers" role="button" tabindex="0">
+            <span class="nav-icon">👨‍🌾</span> Farmers
+          </a>
+          <a class="nav-link" data-tab="reviews" role="button" tabindex="0">
+            <span class="nav-icon">⭐</span> Reviews
+          </a>
+        </nav>
+        <button id="btn-logout" class="btn-logout" type="button">🚪 Log Out</button>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="admin-main">
+
+        <!-- ===== Overview Tab ===== -->
+        <section id="tab-overview" class="admin-section active">
+          <h2>Overview</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value" id="stat-orders">—</div>
+              <div class="stat-label">Total Orders</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="stat-revenue">—</div>
+              <div class="stat-label">Total Revenue</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="stat-products">—</div>
+              <div class="stat-label">Total Products</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="stat-farmers">—</div>
+              <div class="stat-label">Total Farmers</div>
+            </div>
+          </div>
+
+          <h3>Recent Orders (last 5)</h3>
+          <div class="table-wrapper">
+            <table aria-label="Recent orders">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="recent-orders-body">
+                <tr class="empty-row"><td colspan="5">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== Orders Tab ===== -->
+        <section id="tab-orders" class="admin-section">
+          <div class="section-header">
+            <h2>Orders</h2>
+          </div>
+          <div class="table-wrapper">
+            <table aria-label="All orders">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>Address</th>
+                  <th>Items</th>
+                  <th>Total (KES)</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-body">
+                <tr class="empty-row"><td colspan="9">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== Products Tab ===== -->
+        <section id="tab-products" class="admin-section">
+          <div class="section-header">
+            <h2>Products</h2>
+            <button id="btn-add-product" class="btn-primary" type="button">+ Add Product</button>
+          </div>
+          <div class="table-wrapper">
+            <table aria-label="Products">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Farmer</th>
+                  <th>Price (KES)</th>
+                  <th>Category</th>
+                  <th>Unit</th>
+                  <th>Availability</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="products-body">
+                <tr class="empty-row"><td colspan="7">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== Farmers Tab ===== -->
+        <section id="tab-farmers" class="admin-section">
+          <div class="section-header">
+            <h2>Farmers</h2>
+            <button id="btn-add-farmer" class="btn-primary" type="button">+ Add Farmer</button>
+          </div>
+          <div class="table-wrapper">
+            <table aria-label="Farmers">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Location</th>
+                  <th>Bio</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="farmers-body">
+                <tr class="empty-row"><td colspan="4">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== Reviews Tab ===== -->
+        <section id="tab-reviews" class="admin-section">
+          <div class="section-header">
+            <h2>Reviews</h2>
+          </div>
+          <div class="table-wrapper">
+            <table aria-label="Reviews">
+              <thead>
+                <tr>
+                  <th>Reviewer</th>
+                  <th>Rating</th>
+                  <th>Comment</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="reviews-body">
+                <tr class="empty-row"><td colspan="5">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- ===== Product Modal ===== -->
+    <div id="product-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 id="product-modal-title">Add Product</h3>
+          <button id="product-modal-close" class="modal-close" type="button" aria-label="Close modal">×</button>
+        </div>
+        <form id="product-form" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="p-name">Name</label>
+              <input type="text" id="p-name" name="p-name" placeholder="e.g. Tomatoes" required>
+            </div>
+            <div class="form-group">
+              <label for="p-farmer">Farmer</label>
+              <input type="text" id="p-farmer" name="p-farmer" placeholder="e.g. John's Farm" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="p-price">Price (KES)</label>
+              <input type="number" id="p-price" name="p-price" min="0" step="1" placeholder="100" required>
+            </div>
+            <div class="form-group">
+              <label for="p-original-price">Original Price (KES, optional)</label>
+              <input type="number" id="p-original-price" name="p-original-price" min="0" step="1" placeholder="120">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="p-category">Category</label>
+              <select id="p-category" name="p-category" required>
+                <option value="vegetables">Vegetables</option>
+                <option value="greens">Greens</option>
+                <option value="fruits">Fruits</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="p-unit">Unit</label>
+              <input type="text" id="p-unit" name="p-unit" placeholder="e.g. per kg" required>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Save Product</button>
+            <button type="button" id="product-modal-cancel" class="btn-danger">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== Farmer Modal ===== -->
+    <div id="farmer-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="farmer-modal-title">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 id="farmer-modal-title">Add Farmer</h3>
+          <button id="farmer-modal-close" class="modal-close" type="button" aria-label="Close modal">×</button>
+        </div>
+        <form id="farmer-form" novalidate>
+          <div class="form-group">
+            <label for="f-name">Name</label>
+            <input type="text" id="f-name" name="f-name" placeholder="e.g. John Kamau" required>
+          </div>
+          <div class="form-group">
+            <label for="f-location">Location</label>
+            <input type="text" id="f-location" name="f-location" placeholder="e.g. Nakuru, Kenya" required>
+          </div>
+          <div class="form-group">
+            <label for="f-bio">Bio</label>
+            <textarea id="f-bio" name="f-bio" rows="4" placeholder="Short bio about the farmer…" required></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Save Farmer</button>
+            <button type="button" id="farmer-modal-cancel" class="btn-danger">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="admin.js"></script>
+  </body>
+</html>
